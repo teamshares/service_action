@@ -3,7 +3,7 @@
 require_relative "lib/service_action/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "ServiceAction"
+  spec.name = "service_action"
   spec.version = ServiceAction::VERSION
   spec.authors = ["Kali Donovan"]
   spec.email = ["kali@teamshares.com"]
