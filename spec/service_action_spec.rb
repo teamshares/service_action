@@ -24,7 +24,7 @@ RSpec.describe ServiceAction do
       it { is_expected.to be_success }
     end
 
-    context "failure" do
+    context "contract failure" do
       subject { action.call(foo: 9, bar: 5, baz: 1) }
 
       it "fails" do
@@ -40,7 +40,12 @@ RSpec.describe ServiceAction do
   describe "outbound validation" do
     let(:action) do
       build_action do
-        provides :bar, Numeric, numericality: { greater_than: 10 }
+        exposes :bar, Numeric, numericality: { greater_than: 10 }
+        exposes :qux, Numeric
+
+        def call
+          expose :qux, 99
+        end
       end
     end
 
@@ -48,13 +53,20 @@ RSpec.describe ServiceAction do
       subject { action.call(foo: 10, bar: 11, baz: 1) }
 
       it { is_expected.to be_success }
-      it { expect(subject.bar).to eq(11) }
+
+      it "exposes existing context" do
+        expect(subject.bar).to eq(11)
+      end
+
+      it "exposes new values" do
+        expect(subject.qux).to eq(99)
+      end
 
       # TODO: should this be swallowed and just be_failure with an exception attached?
       it { expect { subject.foo }.to raise_error(ServiceAction::ContractualContextInterface::ContextFacade::ContextMethodNotAllowed) }
     end
 
-    context "failure" do
+    context "contract failure" do
       subject { action.call(foo: 10, bar: 9, baz: 1) }
 
       it "fails" do
@@ -65,13 +77,33 @@ RSpec.describe ServiceAction do
         expect(subject.exception.message).to eq("Bar must be greater than 10")
       end
     end
+
+    context "setting failure" do
+      subject { action.call(foo: 10, bar: 11, baz: 1) }
+
+      let(:action) do
+        build_action do
+          exposes :bar, Numeric, numericality: { greater_than: 10 }
+
+          def call
+            expose :qux, 99
+          end
+        end
+      end
+
+      it "fails" do
+        expect(subject).to be_failure
+        expect(subject.error).to eq("Something went wrong")
+        expect(subject.exception).to be_a(ServiceAction::InvalidExposureAttempt)
+      end
+    end
   end
 
   describe "complex validation" do
     let(:action) do
       build_action do
         expects :foo, String
-        provides :bar, String
+        exposes :bar, String
       end
     end
 

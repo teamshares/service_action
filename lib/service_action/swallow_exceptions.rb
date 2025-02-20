@@ -27,7 +27,7 @@ module ServiceAction
           @context.exception = e
 
           # TODO: Kali -- implement the ability for custom hook here so we can log to honeybadger
-          # on_exception(e) #if respond_to?(:on_exception)
+          # on_exception(e) if base.respond_to?(:on_exception)
           # puts "Failed, reporting to honeybadger: #{@context.to_h}"
 
           # TODO: Log to honeybadger

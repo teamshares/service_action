@@ -13,7 +13,7 @@ RSpec.describe "Validations" do
   let(:interactor) {
     build_interactor do
       expects :foo, Numeric, numericality: { greater_than: 10 }
-      provides :bar
+      exposes :bar
 
       def call
         puts "In interactor: #{inbound_context.inspect}"
@@ -59,7 +59,7 @@ RSpec.describe "Validations" do
     let(:interactor) {
       build_interactor do
         expects :foo, Numeric, allow_blank: true
-        provides :bar, allow_blank: true
+        exposes :bar, allow_blank: true
       end
     }
 

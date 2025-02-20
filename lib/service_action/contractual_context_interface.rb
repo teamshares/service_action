@@ -18,6 +18,7 @@ module ServiceAction
 
   class InboundContractViolation < ContractViolationException; end
   class OutboundContractViolation < ContractViolationException; end
+  class InvalidExposureAttempt < StandardError; end
 
   module ContractualContextInterface
     def self.included(base)
@@ -55,7 +56,7 @@ module ServiceAction
         field
       end
 
-      def provides(field, type = nil, allow_blank: false, **additional_validations)
+      def exposes(field, type = nil, allow_blank: false, **additional_validations)
         @outbound_accessors << field
 
         @outbound_validations[field][:presence] = true unless allow_blank
@@ -73,6 +74,23 @@ module ServiceAction
       # NOTE: ideally no direct access from client code, but we need to expose this for internal Interactor methods
       # (and passing through control methods to underlying context) in order to avoid rewriting internal methods.
       def context = outbound_context
+
+      # Accepts either two positional arguments (key, value) or a hash of key/value pairs
+      def expose(*args, **kwargs)
+        if args.any?
+          raise ArgumentError, "expose must be called with exactly two positional arguments (or a hash of key/value pairs)" if args.size != 2
+
+          kwargs.merge!(args.first => args.last)
+        end
+
+        # TODO: handle collisions with already-existing vars!
+
+        kwargs.each do |key, value|
+          outbound_context.public_send("#{key}=", value)
+        rescue NoMethodError
+          raise InvalidExposureAttempt, "Attempted to expose unknown key '#{key}': be sure to declare it with `exposes :#{key}`"
+        end
+      end
     end
 
     module ValidationInstanceMethods
@@ -154,7 +172,7 @@ module ServiceAction
 
       private
 
-      def exposure_method_name = @direction == :inbound ? :expects : :provides
+      def exposure_method_name = @direction == :inbound ? :expects : :exposes
 
       INTERNALLY_USED_METHODS = %i[called! fail! rollback!]
 
