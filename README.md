@@ -2,6 +2,9 @@
 
 Just spinning this up -- not yet released (i.e. doc updates to come later).
 
+## Notes
+* Define `metrics_hook` on base class to enable metrics tracking
+
 ---
 
 TODO: Delete this and the text below, and describe your gem

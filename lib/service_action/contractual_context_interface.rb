@@ -35,7 +35,7 @@ module ServiceAction
         remove_method :context
 
         around do |hooked|
-        puts "validations before"
+          puts "validations before"
           validate_context!(:inbound)
           hooked.call
           validate_context!(:outbound)
@@ -150,6 +150,7 @@ module ServiceAction
       def object_id = @context.object_id
 
       def_delegators :@context, :success?, :failure?, :fail!, :error, :exception
+      def ok? = success?
 
       private
 

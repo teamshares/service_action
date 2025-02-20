@@ -4,29 +4,18 @@ require_relative "service_action/version"
 
 require "interactor"
 
+require_relative "service_action/metrics_hook"
 require_relative "service_action/contractual_context_interface"
 require_relative "service_action/swallow_exceptions"
-
-
-# Pattern to allow outer wrapper to be added later?
-module Metricsz
-  def self.included(base)
-    base.class_eval do
-      around do |hooked|
-        # TODO: wrap with Datadog::Tracing...
-        puts "METRICS START"
-        hooked.call
-        puts "METRICS END"
-      end
-    end
-  end
-end
 
 module ServiceAction
   def self.included(base)
     base.class_eval do
       include Interactor
-      include Metrics if defined?(Metrics)
+
+      # Note: first include, so we start the trace before we do anything else (like contract validation)
+      include MetricsHook
+
       include ContractualContextInterface
       include SwallowExceptions
     end
