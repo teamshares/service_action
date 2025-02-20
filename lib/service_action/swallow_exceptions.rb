@@ -18,12 +18,9 @@ module ServiceAction
         def run_with_exception_swallowing!
           original_run!
         rescue Interactor::Failure => e
-          # TODO: do we want to reraise this here?
-          puts "SwallowExceptions caught #{e.class.name} (reraising): #{e}"
+          # NOTE: pretty sure we just want to re-raise these (so we don't hit the unexpected-error case below)
           raise e
         rescue StandardError => e
-          puts "SwallowExceptions caught #{e.class.inspect} (converting into Interactor failure): #{e.message}"
-
           # Add custom hook for intercepting exceptions (e.g. Teamshares automatically logs to Honeybadger)
           if self.class.respond_to?(:on_exception)
             begin
