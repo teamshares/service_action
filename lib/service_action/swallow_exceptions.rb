@@ -24,14 +24,17 @@ module ServiceAction
         rescue StandardError => e
           puts "SwallowExceptions caught #{e.class.inspect} (converting into Interactor failure): #{e.message}"
 
+          # Add custom hook for intercepting exceptions (e.g. Teamshares automatically logs to Honeybadger)
+          if self.class.respond_to?(:on_exception)
+            begin
+              self.class.on_exception(e, context: @context.to_h)
+            rescue StandardError
+              # No action needed (on_exception should log any internal failures), but we don't want
+              # exception *handling* failures to cascade and overwrite the original exception.
+            end
+          end
+
           @context.exception = e
-
-          # TODO: Kali -- implement the ability for custom hook here so we can log to honeybadger
-          # on_exception(e) if base.respond_to?(:on_exception)
-          # puts "Failed, reporting to honeybadger: #{@context.to_h}"
-
-          # TODO: Log to honeybadger
-          # Honeybadger.notify("[#{self.class.name}] Failed #{direction} validation: #{errors.full_messages.to_sentence}", context: @context)
 
           fail!(GENERIC_ERROR_MESSAGE)
         end
