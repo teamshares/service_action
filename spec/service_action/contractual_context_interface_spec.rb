@@ -10,7 +10,7 @@ RSpec.describe "Validations" do
     interactor
   end
 
-  let(:interactor) {
+  let(:interactor) do
     build_interactor do
       expects :foo, Numeric, numericality: { greater_than: 10 }
       exposes :bar
@@ -19,7 +19,7 @@ RSpec.describe "Validations" do
         foo * 10
       end
     end
-  }
+  end
 
   context "when successful" do
     subject { interactor.call(foo: 11, bar: 12, baz: 13) }
@@ -33,10 +33,14 @@ RSpec.describe "Validations" do
       expect(subject.bar).to eq 12
 
       # Defined on context, but only allowed on inbound facade
-      expect { subject.foo }.to raise_error(ServiceAction::ContractualContextInterface::ContextFacade::ContextMethodNotAllowed)
+      expect do
+        subject.foo
+      end.to raise_error(ServiceAction::ContractualContextInterface::ContextFacade::ContextMethodNotAllowed)
 
       # Defined on context, but blocked by facade
-      expect { subject.baz }.to raise_error(ServiceAction::ContractualContextInterface::ContextFacade::ContextMethodNotAllowed)
+      expect do
+        subject.baz
+      end.to raise_error(ServiceAction::ContractualContextInterface::ContextFacade::ContextMethodNotAllowed)
 
       # Not defined at all on context
       expect { subject.quz }.to raise_error(NoMethodError)
@@ -46,7 +50,7 @@ RSpec.describe "Validations" do
   context "inbound context facade inspect" do
     subject { interactor.call(foo: 11).the_inbound_context.inspect }
 
-    let(:interactor) {
+    let(:interactor) do
       build_interactor do
         expects :foo, Numeric, numericality: { greater_than: 10 }
         exposes :the_inbound_context
@@ -55,7 +59,7 @@ RSpec.describe "Validations" do
           expose :the_inbound_context, inbound_context
         end
       end
-    }
+    end
 
     it { is_expected.to eq "#<InboundContextFacade foo: 11>" }
   end
@@ -87,12 +91,12 @@ RSpec.describe "Validations" do
   context "allow_blank" do
     subject { interactor.call(foo: nil, bar: nil, baz: 13) }
 
-    let(:interactor) {
+    let(:interactor) do
       build_interactor do
         expects :foo, Numeric, allow_blank: true
         exposes :bar, allow_blank: true
       end
-    }
+    end
 
     it { is_expected.to be_success }
   end
@@ -100,12 +104,12 @@ RSpec.describe "Validations" do
   context "inbound defaults" do
     subject { interactor.call }
 
-    let(:interactor) {
+    let(:interactor) do
       build_interactor do
         expects :foo, Numeric, default: 99
         exposes :foo
       end
-    }
+    end
 
     it "are set correctly" do
       is_expected.to be_success
@@ -116,11 +120,11 @@ RSpec.describe "Validations" do
   context "outbound defaults" do
     subject { interactor.call }
 
-    let(:interactor) {
+    let(:interactor) do
       build_interactor do
         exposes :foo, default: 99
       end
-    }
+    end
 
     it "are set correctly" do
       is_expected.to be_success
@@ -131,7 +135,7 @@ RSpec.describe "Validations" do
   context "can expose" do
     subject { interactor.call }
 
-    let(:interactor) {
+    let(:interactor) do
       build_interactor do
         exposes :qux
 
@@ -139,7 +143,7 @@ RSpec.describe "Validations" do
           expose :qux, 99
         end
       end
-    }
+    end
 
     it "can expose" do
       is_expected.to be_success

@@ -63,7 +63,11 @@ RSpec.describe ServiceAction do
       end
 
       # TODO: should this be swallowed and just be_failure with an exception attached?
-      it { expect { subject.foo }.to raise_error(ServiceAction::ContractualContextInterface::ContextFacade::ContextMethodNotAllowed) }
+      it {
+        expect do
+          subject.foo
+        end.to raise_error(ServiceAction::ContractualContextInterface::ContextFacade::ContextMethodNotAllowed)
+      }
     end
 
     context "contract failure" do
@@ -130,7 +134,7 @@ RSpec.describe ServiceAction do
     subject { action.call }
 
     context "when successful" do
-      let(:action) { build_action { } }
+      let(:action) { build_action {} }
 
       it "is ok" do
         is_expected.to be_success
@@ -184,9 +188,9 @@ RSpec.describe ServiceAction do
 
   context "can call!" do
     let(:action) do
-      build_action {
+      build_action do
         raise "bad thing"
-      }
+      end
     end
 
     it "is ok" do

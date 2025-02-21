@@ -13,7 +13,7 @@ module ServiceAction
     base.class_eval do
       include Interactor
 
-      # Note: first include, so we start the trace before we do anything else (like contract validation)
+      # NOTE: first include, so we start the trace before we do anything else (like contract validation)
       include MetricsHook
 
       include ContractualContextInterface

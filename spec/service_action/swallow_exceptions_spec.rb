@@ -14,7 +14,7 @@ RSpec.describe "Swallowing exceptions" do
     subject { interactor.call }
 
     context "when successful" do
-      let(:interactor) { build_interactor { } }
+      let(:interactor) { build_interactor {} }
 
       it "is ok" do
         is_expected.to be_success

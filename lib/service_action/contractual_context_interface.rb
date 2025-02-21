@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # TODO: just use ActiveSupport::Delegate?
 require "forwardable"
 require "active_model"
@@ -25,8 +27,8 @@ module ServiceAction
       base.class_eval do
         @inbound_accessors ||= []
         @outbound_accessors ||= []
-        @inbound_defaults = Hash.new
-        @outbound_defaults = Hash.new
+        @inbound_defaults = {}
+        @outbound_defaults = {}
         @inbound_validations = Hash.new { |h, k| h[k] = {} }
         @outbound_validations = Hash.new { |h, k| h[k] = {} }
 
@@ -87,7 +89,10 @@ module ServiceAction
       # Accepts either two positional arguments (key, value) or a hash of key/value pairs
       def expose(*args, **kwargs)
         if args.any?
-          raise ArgumentError, "expose must be called with exactly two positional arguments (or a hash of key/value pairs)" if args.size != 2
+          if args.size != 2
+            raise ArgumentError,
+                  "expose must be called with exactly two positional arguments (or a hash of key/value pairs)"
+          end
 
           kwargs.merge!(args.first => args.last)
         end
@@ -98,7 +103,8 @@ module ServiceAction
           if outbound_context.respond_to?(key)
             @context.public_send("#{key}=", value)
           else
-            raise InvalidExposureAttempt, "Attempted to expose unknown key '#{key}': be sure to declare it with `exposes :#{key}`"
+            raise InvalidExposureAttempt,
+                  "Attempted to expose unknown key '#{key}': be sure to declare it with `exposes :#{key}`"
           end
         end
       end
@@ -116,7 +122,6 @@ module ServiceAction
           @context.public_send("#{field}=", default_value) unless @context.public_send(field)
         end
       end
-
 
       def validate_context!(direction)
         raise ArgumentError, "Invalid direction: #{direction}" unless %i[inbound outbound].include?(direction)
@@ -176,17 +181,17 @@ module ServiceAction
         allowed_fields = @interactor.class.instance_variable_get("@#{direction}_accessors")
 
         allowed_fields.compact.each do |field|
-          self.singleton_class.define_method(field) { @context.public_send(field) }
+          singleton_class.define_method(field) { @context.public_send(field) }
         end
 
-        self.singleton_class.define_method(:inspect) do
-          visible_fields = allowed_fields.map { |field| "#{field}: #{self.public_send(field).inspect}" }.join(", ")
+        singleton_class.define_method(:inspect) do
+          visible_fields = allowed_fields.map { |field| "#{field}: #{public_send(field).inspect}" }.join(", ")
           status = if direction == :outbound
-            ex_type = @context.exception ? "#{@context.exception.class.name}: " : ""
-            %Q{ [#{@context.success? ? "OK" : "failed with #{ex_type}'#{@context.error}'"}]}
-          end
+                     ex_type = @context.exception ? "#{@context.exception.class.name}: " : ""
+                     %( [#{@context.success? ? "OK" : "failed with #{ex_type}'#{@context.error}'"}])
+                   end
 
-          "#<#{direction.to_s.capitalize}#{self.class.name.split('::').last}#{status} #{visible_fields}>"
+          "#<#{direction.to_s.capitalize}#{self.class.name.split("::").last}#{status} #{visible_fields}>"
         end
       end
 
@@ -201,7 +206,7 @@ module ServiceAction
 
       def exposure_method_name = @direction == :inbound ? :expects : :exposes
 
-      INTERNALLY_USED_METHODS = %i[called! fail! rollback!]
+      INTERNALLY_USED_METHODS = %i[called! fail! rollback!].freeze
 
       # Add nice error message for missing methods
       def method_missing(method_name, *args, &block)
@@ -216,7 +221,7 @@ module ServiceAction
             return @context.send(method_name, *args, &block)
           end
 
-          msg =<<~MSG
+          msg = <<~MSG
             Method ##{method_name} is not available on the #{@direction} context facade!
 
             #{@interactor.class.name || "The interactor"} is missing a line like:
