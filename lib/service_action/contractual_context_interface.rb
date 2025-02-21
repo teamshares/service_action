@@ -179,11 +179,14 @@ module ServiceAction
           self.singleton_class.define_method(field) { @context.public_send(field) }
         end
 
-        # TODO: inspect or to_s?
         self.singleton_class.define_method(:inspect) do
-          visible_layer = allowed_fields.map { |field| "#{field}: #{self.public_send(field).inspect}" }.join(", ")
+          visible_fields = allowed_fields.map { |field| "#{field}: #{self.public_send(field).inspect}" }.join(", ")
+          status = if direction == :outbound
+            ex_type = @context.exception ? "#{@context.exception.class.name}: " : ""
+            %Q{ [#{@context.success? ? "OK" : "failed with #{ex_type}'#{@context.error}'"}]}
+          end
 
-          "#<#{self.class.name.split('::').last} (#{direction}) #{visible_layer}>"
+          "#<#{direction.to_s.capitalize}#{self.class.name.split('::').last}#{status} #{visible_fields}>"
         end
       end
 

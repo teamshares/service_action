@@ -26,8 +26,8 @@ RSpec.describe "Validations" do
 
     it "creates accessor" do
       is_expected.to be_success
-      puts subject.inspect
       is_expected.to be_a(ServiceAction::ContractualContextInterface::ContextFacade)
+      expect(subject.inspect).to eq("#<OutboundContextFacade [OK] bar: 12>")
 
       # Defined on context and allowed by outbound facade
       expect(subject.bar).to eq 12
@@ -41,6 +41,23 @@ RSpec.describe "Validations" do
       # Not defined at all on context
       expect { subject.quz }.to raise_error(NoMethodError)
     end
+  end
+
+  context "inbound context facade inspect" do
+    subject { interactor.call(foo: 11).the_inbound_context.inspect }
+
+    let(:interactor) {
+      build_interactor do
+        expects :foo, Numeric, numericality: { greater_than: 10 }
+        exposes :the_inbound_context
+
+        def call
+          expose :the_inbound_context, inbound_context
+        end
+      end
+    }
+
+    it { is_expected.to eq "#<InboundContextFacade foo: 11>" }
   end
 
   context "with validations" do
