@@ -9,4 +9,6 @@ require "rubocop/rake_task"
 
 RuboCop::RakeTask.new
 
-task default: %i[spec rubocop]
+# TODO: Kali -- re-enable rubocop once I've reorganized files and ported over the set we actually care about
+# task default: %i[spec rubocop]
+task default: %i[spec]
