@@ -4,6 +4,7 @@ Just spinning this up -- not yet released (i.e. doc updates to come later).
 
 ## Notes
 * Define `metrics_hook` on base class to enable metrics tracking
+* Define `generic_error_message` on the interactor _class_ to override what gets set on result.error when exceptions caught
 
 ---
 

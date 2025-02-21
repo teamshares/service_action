@@ -86,9 +86,11 @@ module ServiceAction
         # TODO: handle collisions with already-existing vars!
 
         kwargs.each do |key, value|
-          outbound_context.public_send("#{key}=", value)
-        rescue NoMethodError
-          raise InvalidExposureAttempt, "Attempted to expose unknown key '#{key}': be sure to declare it with `exposes :#{key}`"
+          if outbound_context.respond_to?(key)
+            @context.public_send("#{key}=", value)
+          else
+            raise InvalidExposureAttempt, "Attempted to expose unknown key '#{key}': be sure to declare it with `exposes :#{key}`"
+          end
         end
       end
     end

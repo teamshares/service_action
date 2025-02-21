@@ -37,4 +37,5 @@ Gem::Specification.new do |spec|
 
   # Dev depedencies
   spec.add_development_dependency "rspec", "~> 3.2"
+  spec.add_development_dependency "pry-byebug", "3.10.1"
 end

@@ -14,12 +14,6 @@ RSpec.describe "Validations" do
     build_interactor do
       expects :foo, Numeric, numericality: { greater_than: 10 }
       exposes :bar
-
-      def call
-        puts "In interactor: #{inbound_context.inspect}"
-        puts "CTX:::: #{context.inspect}"
-        puts "10 * #{inbound_context.foo} = #{inbound_context.foo * 10}"
-      end
     end
   }
 
@@ -53,6 +47,14 @@ RSpec.describe "Validations" do
     end
   end
 
+  context "with outbound missing" do
+    subject { interactor.call(foo: 11, baz: 13) }
+
+    it "fails" do
+      expect { subject }.to raise_error(ServiceAction::OutboundContractViolation)
+    end
+  end
+
   context "allow_blank" do
     subject { interactor.call(foo: nil, bar: nil, baz: 13) }
 
@@ -64,5 +66,24 @@ RSpec.describe "Validations" do
     }
 
     it { is_expected.to be_success }
+  end
+
+  context "can expose" do
+    subject { interactor.call }
+
+    let(:interactor) {
+      build_interactor do
+        exposes :qux
+
+        def call
+          expose :qux, 99
+        end
+      end
+    }
+
+    it "can expose" do
+      is_expected.to be_success
+      expect(subject.qux).to eq 99
+    end
   end
 end

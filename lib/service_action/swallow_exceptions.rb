@@ -33,7 +33,8 @@ module ServiceAction
 
           @context.exception = e
 
-          fail!(GENERIC_ERROR_MESSAGE)
+          msg = self.class.respond_to?(:generic_error_message) ? self.class.generic_error_message : GENERIC_ERROR_MESSAGE
+          fail!(msg)
         end
 
         alias_method :original_run!, :run!

@@ -53,6 +53,12 @@ RSpec.describe "Swallowing exceptions" do
         expect(subject.exception).to be_a(RuntimeError)
         expect(subject.exception.message).to eq("Some internal issue!")
       end
+
+      it "allows overriding the generic error message" do
+        interactor.define_singleton_method(:generic_error_message) { "Custom error message" }
+        is_expected.not_to be_success
+        expect(subject.error).to eq("Custom error message")
+      end
     end
   end
 end
