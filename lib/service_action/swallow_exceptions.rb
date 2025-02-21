@@ -8,13 +8,6 @@ module ServiceAction
 
     def self.included(base)
       base.class_eval do
-        private
-
-        def fail!(message)
-          # TODO: implement this centrally
-          context.fail!(error: message)
-        end
-
         def run_with_exception_swallowing!
           original_run!
         rescue Interactor::Failure => e
@@ -39,6 +32,13 @@ module ServiceAction
 
         alias_method :original_run!, :run!
         alias_method :run!, :run_with_exception_swallowing!
+
+        private
+
+        def fail!(message)
+          # TODO: implement this centrally
+          context.fail!(error: message)
+        end
       end
     end
   end

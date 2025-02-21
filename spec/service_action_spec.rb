@@ -171,4 +171,28 @@ RSpec.describe ServiceAction do
       end
     end
   end
+
+  context "can call!" do
+    let(:action) do
+      build_action {}
+    end
+
+    it "is ok" do
+      action.call!
+    end
+  end
+
+  context "can call!" do
+    let(:action) do
+      build_action {
+        raise "bad thing"
+      }
+    end
+
+    it "is ok" do
+      expect { action.call! }.to raise_error
+      expect { action.call }.not_to raise_error
+      expect(action.call).not_to be_success
+    end
+  end
 end

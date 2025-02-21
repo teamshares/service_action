@@ -25,6 +25,8 @@ module ServiceAction
       base.class_eval do
         @inbound_accessors ||= []
         @outbound_accessors ||= []
+        @inbound_defaults = Hash.new
+        @outbound_defaults = Hash.new
         @inbound_validations = Hash.new { |h, k| h[k] = {} }
         @outbound_validations = Hash.new { |h, k| h[k] = {} }
 
@@ -36,32 +38,39 @@ module ServiceAction
         remove_method :context
 
         around do |hooked|
-          puts "validations before"
+          apply_inbound_defaults!
           validate_context!(:inbound)
           hooked.call
+          apply_outbound_defaults!
           validate_context!(:outbound)
-          puts "validations end"
         end
       end
     end
 
     module ClassMethods
-      def expects(field, type = nil, allow_blank: false, **additional_validations)
+      def expects(field, type = nil, allow_blank: false, default: nil, **additional_validations)
         @inbound_accessors << field
 
         @inbound_validations[field][:presence] = true unless allow_blank
         @inbound_validations[field][:type] = type if type.present?
         @inbound_validations[field].merge!(additional_validations) if additional_validations.present?
 
+        # Allow local access to explicitly-expected fields
+        define_method(field) { inbound_context.public_send(field) }
+
+        @inbound_defaults[field] = default if default.present?
+
         field
       end
 
-      def exposes(field, type = nil, allow_blank: false, **additional_validations)
+      def exposes(field, type = nil, allow_blank: false, default: nil, **additional_validations)
         @outbound_accessors << field
 
         @outbound_validations[field][:presence] = true unless allow_blank
         @outbound_validations[field][:type] = type if type.present?
         @outbound_validations[field].merge!(additional_validations) if additional_validations.present?
+
+        @outbound_defaults[field] = default if default.present?
 
         field
       end
@@ -96,6 +105,19 @@ module ServiceAction
     end
 
     module ValidationInstanceMethods
+      def apply_inbound_defaults!
+        self.class.instance_variable_get("@inbound_defaults").each do |field, default_value|
+          @context.public_send("#{field}=", default_value) unless @context.public_send(field)
+        end
+      end
+
+      def apply_outbound_defaults!
+        self.class.instance_variable_get("@outbound_defaults").each do |field, default_value|
+          @context.public_send("#{field}=", default_value) unless @context.public_send(field)
+        end
+      end
+
+
       def validate_context!(direction)
         raise ArgumentError, "Invalid direction: #{direction}" unless %i[inbound outbound].include?(direction)
 

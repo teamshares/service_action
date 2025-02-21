@@ -14,6 +14,10 @@ RSpec.describe "Validations" do
     build_interactor do
       expects :foo, Numeric, numericality: { greater_than: 10 }
       exposes :bar
+
+      def call
+        foo * 10
+      end
     end
   }
 
@@ -47,6 +51,14 @@ RSpec.describe "Validations" do
     end
   end
 
+  context "with missing inbound args" do
+    subject { interactor.call(bar: 12, baz: 13) }
+
+    it "fails inbound" do
+      expect { subject }.to raise_error(ServiceAction::InboundContractViolation)
+    end
+  end
+
   context "with outbound missing" do
     subject { interactor.call(foo: 11, baz: 13) }
 
@@ -66,6 +78,37 @@ RSpec.describe "Validations" do
     }
 
     it { is_expected.to be_success }
+  end
+
+  context "inbound defaults" do
+    subject { interactor.call }
+
+    let(:interactor) {
+      build_interactor do
+        expects :foo, Numeric, default: 99
+        exposes :foo
+      end
+    }
+
+    it "are set correctly" do
+      is_expected.to be_success
+      expect(subject.foo).to eq 99
+    end
+  end
+
+  context "outbound defaults" do
+    subject { interactor.call }
+
+    let(:interactor) {
+      build_interactor do
+        exposes :foo, default: 99
+      end
+    }
+
+    it "are set correctly" do
+      is_expected.to be_success
+      expect(subject.foo).to eq 99
+    end
   end
 
   context "can expose" do
