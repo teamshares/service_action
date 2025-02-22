@@ -53,8 +53,11 @@ module ServiceAction
       def expects(field, type = nil, allow_blank: false, default: nil, **additional_validations)
         @inbound_accessors << field
 
+        allow_blank = true if additional_validations.has_key?(:boolean) # If we're using the boolean validator, we need to allow blank to let false get through
         @inbound_validations[field][:presence] = true unless allow_blank
         @inbound_validations[field][:type] = type if type.present?
+
+        # TODO: do we need to merge allow_blank into all subsequent validations' options?
         @inbound_validations[field].merge!(additional_validations) if additional_validations.present?
 
         # Allow local access to explicitly-expected fields
@@ -68,6 +71,7 @@ module ServiceAction
       def exposes(field, type = nil, allow_blank: false, default: nil, **additional_validations)
         @outbound_accessors << field
 
+        allow_blank = true if additional_validations.has_key?(:boolean) # If we're using the boolean validator, we need to allow blank to let false get through
         @outbound_validations[field][:presence] = true unless allow_blank
         @outbound_validations[field][:type] = type if type.present?
         @outbound_validations[field].merge!(additional_validations) if additional_validations.present?
@@ -158,12 +162,22 @@ module ServiceAction
         @context.public_send(attr)
       end
 
+      class BooleanValidator < ActiveModel::EachValidator
+        def validate_each(record, attribute, value)
+          return if [true, false].include?(value)
+
+          record.errors.add(attribute, "must be true or false")
+        end
+      end
+
       class TypeValidator < ActiveModel::EachValidator
         def validate_each(record, attribute, value)
           return if value.blank? # Handled with a separate default presence validator
 
-          type = options[:with]
-          record.errors.add attribute, (options[:message] || "is not a #{type}") unless value.is_a?(type)
+          types = options[:in] || Array(options[:with])
+
+          msg = types.size == 1 ? "is not a #{types.first}" : "is not one of #{types.join(', ')}"
+          record.errors.add attribute, (options[:message] || msg) unless types.any? { |type| value.is_a?(type) }
         end
       end
     end

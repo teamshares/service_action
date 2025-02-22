@@ -150,4 +150,49 @@ RSpec.describe "Validations" do
       expect(subject.qux).to eq 99
     end
   end
+
+  context "type validation accepts array of types" do
+    subject { interactor.call(foo:) }
+
+    let(:interactor) do
+      build_interactor do
+        expects :foo, [String, Numeric]
+      end
+    end
+
+    context "when valid" do
+      let(:foo) { 123 }
+      it { is_expected.to be_success }
+    end
+
+    context "when invalid" do
+      let(:foo) { Object.new }
+      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Foo is not one of String, Numeric") }
+    end
+
+    context "when false" do
+      let(:foo) { false }
+      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Foo can't be blank") }
+    end
+  end
+
+  context "explicit presence settings override implicit validation" do
+    subject { interactor.call(foo:) }
+
+    let(:interactor) do
+      build_interactor do
+        expects :foo, boolean: true
+      end
+    end
+
+    context "when false" do
+      let(:foo) { false }
+      it { is_expected.to be_success }
+    end
+
+    context "when false" do
+      let(:foo) { nil }
+      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Foo must be true or false") }
+    end
+  end
 end
