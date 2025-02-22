@@ -195,4 +195,29 @@ RSpec.describe "Validations" do
       it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Foo must be true or false") }
     end
   end
+
+  context "support optional outbound exposures" do
+    subject { interactor.call(foo:) }
+
+    let(:interactor) do
+      build_interactor do
+        expects :foo, boolean: true
+        exposes :bar, allow_blank: true
+
+        def call
+          expose :bar, 99 if foo
+        end
+      end
+    end
+
+    context "when not set" do
+      let(:foo) { false }
+      it { is_expected.to be_success }
+    end
+
+    context "when set" do
+      let(:foo) { true }
+      it { is_expected.to be_success }
+    end
+  end
 end
