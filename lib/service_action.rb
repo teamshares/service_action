@@ -8,6 +8,8 @@ require_relative "service_action/metrics_hook"
 require_relative "service_action/contractual_context_interface"
 require_relative "service_action/swallow_exceptions"
 
+require_relative "service_action/organizer"
+
 module ServiceAction
   def self.included(base)
     base.class_eval do

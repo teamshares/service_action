@@ -188,7 +188,8 @@ module ServiceAction
           visible_fields = allowed_fields.map { |field| "#{field}: #{public_send(field).inspect}" }.join(", ")
           status = if direction == :outbound
                      ex_type = @context.exception ? "#{@context.exception.class.name}: " : ""
-                     %( [#{@context.success? ? "OK" : "failed with #{ex_type}'#{@context.error}'"}])
+                     ex_msg = @context.exception ? @context.exception.message : @context.error
+                     %( [#{@context.success? ? "OK" : "failed with #{ex_type}'#{ex_msg}'"}])
                    end
 
           "#<#{direction.to_s.capitalize}#{self.class.name.split("::").last}#{status} #{visible_fields}>"
@@ -206,7 +207,7 @@ module ServiceAction
 
       def exposure_method_name = @direction == :inbound ? :expects : :exposes
 
-      INTERNALLY_USED_METHODS = %i[called! fail! rollback!].freeze
+      INTERNALLY_USED_METHODS = %i[called! fail! rollback! each_pair].freeze
 
       # Add nice error message for missing methods
       def method_missing(method_name, *args, &block)
