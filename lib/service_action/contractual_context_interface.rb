@@ -219,6 +219,8 @@ module ServiceAction
       def_delegators :@context, :success?, :failure?, :error, :exception
       def ok? = success?
 
+      def fail!(...) = raise ContextMethodNotAllowed, "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
+
       private
 
       def exposure_method_name = @direction == :inbound ? :expects : :exposes
