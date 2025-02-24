@@ -141,11 +141,11 @@ RSpec.describe ServiceAction do
       end
     end
 
-    context "when fail! (user facing error)" do
+    context "when fail_with (user facing error)" do
       let(:action) do
         build_action do
           def call
-            fail!("User-facing error")
+            fail_with("User-facing error")
           end
         end
       end

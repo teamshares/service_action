@@ -21,9 +21,5 @@ module ServiceAction
       include ContractualContextInterface
       include SwallowExceptions
     end
-
-    # base.define_singleton_method(:on_exception) do |*args|
-    #   puts "GOT !!!!"
-    # end
   end
 end

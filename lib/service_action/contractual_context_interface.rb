@@ -216,14 +216,14 @@ module ServiceAction
       # Failures arising from other contexts in Interactor#run
       def object_id = @context.object_id
 
-      def_delegators :@context, :success?, :failure?, :fail!, :error, :exception
+      def_delegators :@context, :success?, :failure?, :error, :exception
       def ok? = success?
 
       private
 
       def exposure_method_name = @direction == :inbound ? :expects : :exposes
 
-      INTERNALLY_USED_METHODS = %i[called! fail! rollback! each_pair].freeze
+      INTERNALLY_USED_METHODS = %i[called! rollback! each_pair].freeze
 
       # Add nice error message for missing methods
       def method_missing(method_name, *args, &block)

@@ -27,7 +27,7 @@ module ServiceAction
           @context.exception = e
 
           msg = self.class.respond_to?(:generic_error_message) ? self.class.generic_error_message : GENERIC_ERROR_MESSAGE
-          fail!(msg)
+          fail_with(msg)
         end
 
         alias_method :original_run!, :run!
@@ -35,9 +35,9 @@ module ServiceAction
 
         private
 
-        def fail!(message)
+        def fail_with(message)
           # TODO: implement this centrally
-          context.fail!(error: message)
+          @context.fail!(error: message)
         end
       end
     end
