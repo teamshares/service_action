@@ -5,8 +5,8 @@
 class DateParser
   include ServiceAction
 
-  expects :date, String
-  exposes :date, Date
+  expects :date, type: String
+  exposes :date, type: Date
 
   def call
     expose date: Date.parse(date)
@@ -18,8 +18,8 @@ end
 class DateEvaluator
   include ServiceAction
 
-  expects :date, Date
-  exposes :year, Integer
+  expects :date, type: Date
+  exposes :year, type: Integer
 
   def call
     expose :year, date.year
@@ -35,8 +35,8 @@ end
 class ServiceActionOrganizer
   include ServiceAction::Organizer
 
-  expects :date, String
-  exposes :year, Integer
+  expects :date, type: String
+  exposes :year, type: Integer
 
   organize DateParser, DateEvaluator
 end

@@ -14,7 +14,7 @@ RSpec.describe ServiceAction do
   describe "inbound validation" do
     let(:action) do
       build_action do
-        expects :foo, Numeric, numericality: { greater_than: 10 }
+        expects :foo, type: Numeric, numericality: { greater_than: 10 }
       end
     end
 
@@ -40,8 +40,8 @@ RSpec.describe ServiceAction do
   describe "outbound validation" do
     let(:action) do
       build_action do
-        exposes :bar, Numeric, numericality: { greater_than: 10 }
-        exposes :qux, Numeric
+        exposes :bar, type: Numeric, numericality: { greater_than: 10 }
+        exposes :qux, type: Numeric
 
         def call
           expose :qux, 99
@@ -87,7 +87,7 @@ RSpec.describe ServiceAction do
 
       let(:action) do
         build_action do
-          exposes :bar, Numeric, numericality: { greater_than: 10 }
+          exposes :bar, type: Numeric, numericality: { greater_than: 10 }
 
           def call
             expose :qux, 99
@@ -106,8 +106,8 @@ RSpec.describe ServiceAction do
   describe "complex validation" do
     let(:action) do
       build_action do
-        expects :foo, String
-        exposes :bar, String
+        expects :foo, type: String
+        exposes :bar, type: String
       end
     end
 

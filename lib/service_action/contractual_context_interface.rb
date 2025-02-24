@@ -50,12 +50,11 @@ module ServiceAction
     end
 
     module ClassMethods
-      def expects(field, type = nil, allow_blank: false, default: nil, **additional_validations)
+      def expects(field, allow_blank: false, default: nil, **additional_validations)
         @inbound_accessors << field
 
         allow_blank = true if additional_validations.has_key?(:boolean) # If we're using the boolean validator, we need to allow blank to let false get through
         @inbound_validations[field][:presence] = true unless allow_blank
-        @inbound_validations[field][:type] = type if type.present?
 
         # TODO: do we need to merge allow_blank into all subsequent validations' options?
         @inbound_validations[field].merge!(additional_validations) if additional_validations.present?
@@ -68,12 +67,11 @@ module ServiceAction
         field
       end
 
-      def exposes(field, type = nil, allow_blank: false, default: nil, **additional_validations)
+      def exposes(field, allow_blank: false, default: nil, **additional_validations)
         @outbound_accessors << field
 
         allow_blank = true if additional_validations.has_key?(:boolean) # If we're using the boolean validator, we need to allow blank to let false get through
         @outbound_validations[field][:presence] = true unless allow_blank
-        @outbound_validations[field][:type] = type if type.present?
         @outbound_validations[field].merge!(additional_validations) if additional_validations.present?
 
         @outbound_defaults[field] = default if default.present?

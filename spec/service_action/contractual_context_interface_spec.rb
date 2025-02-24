@@ -12,7 +12,7 @@ RSpec.describe "Validations" do
 
   let(:interactor) do
     build_interactor do
-      expects :foo, Numeric, numericality: { greater_than: 10 }
+      expects :foo, type: Numeric, numericality: { greater_than: 10 }
       exposes :bar
 
       def call
@@ -52,7 +52,7 @@ RSpec.describe "Validations" do
 
     let(:interactor) do
       build_interactor do
-        expects :foo, Numeric, numericality: { greater_than: 10 }
+        expects :foo, type: Numeric, numericality: { greater_than: 10 }
         exposes :the_inbound_context
 
         def call
@@ -93,7 +93,7 @@ RSpec.describe "Validations" do
 
     let(:interactor) do
       build_interactor do
-        expects :foo, Numeric, allow_blank: true
+        expects :foo, type: Numeric, allow_blank: true
         exposes :bar, allow_blank: true
       end
     end
@@ -106,7 +106,7 @@ RSpec.describe "Validations" do
 
     let(:interactor) do
       build_interactor do
-        expects :foo, Numeric, default: 99
+        expects :foo, type: Numeric, default: 99
         exposes :foo
       end
     end
@@ -156,7 +156,7 @@ RSpec.describe "Validations" do
 
     let(:interactor) do
       build_interactor do
-        expects :foo, [String, Numeric]
+        expects :foo, type: [String, Numeric]
       end
     end
 
