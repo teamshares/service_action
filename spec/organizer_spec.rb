@@ -43,7 +43,7 @@ RSpec.describe "Organizing" do
     end
   end
 
-  describe "vanilla organizer" do
+  describe "vanilla organizer [NOT recommended]" do
     subject { VanillaOrganizer.call(date:) }
 
     context "with valid date" do
@@ -60,15 +60,13 @@ RSpec.describe "Organizing" do
     context "with non-string date" do
       let(:date) { Date.parse("2020-01-01") }
 
-      it { is_expected.not_to be_success }
-      it { expect(subject.exception.message).to eq("Date is not a String") }
+      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Date is not a String") }
     end
 
     context "with invalid date string" do
       let(:date) { "a string" }
 
-      it { is_expected.not_to be_success }
-      it { expect(subject.exception.class).to eq(Date::Error) }
+      it { expect { subject }.to raise_error(Date::Error, "invalid date") }
     end
   end
 

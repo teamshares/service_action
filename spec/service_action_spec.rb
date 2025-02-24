@@ -195,28 +195,55 @@ RSpec.describe ServiceAction do
     end
   end
 
-  context "can call! with success" do
-    let(:action) do
-      build_action {}
+  describe ".call!" do
+    context "with success" do
+      let(:action) do
+        build_action {}
+      end
+
+      it "is ok" do
+        expect(action.call!).to be_success
+      end
     end
 
-    it "is ok" do
-      action.call!
+    context "with exception" do
+      let(:action) do
+        build_action do
+          def call
+            raise ZeroDivisionError, "manual bad thing"
+          end
+        end
+      end
+
+      it "call" do
+        result = action.call
+        expect(result).not_to be_success
+        expect(result.error).to eq("Something went wrong")
+      end
+
+      it "raises original exception" do
+        expect { action.call! }.to raise_error(ZeroDivisionError, "manual bad thing")
+      end
+    end
+
+    context "with user-facing failure" do
+      let(:action) do
+        build_action do
+          def call
+            fail_with "User-facing error"
+          end
+        end
+      end
+
+      it "call" do
+        result = action.call
+        expect(result).not_to be_success
+        expect(result.error).to eq("User-facing error")
+      end
+
+      it "raises interactor failure" do
+        expect { action.call! }.to raise_error(Interactor::Failure, "User-facing error")
+      end
     end
   end
-
-  # TODO: implement this
-  # context "can call! with error" do
-  #   let(:action) do
-  #     build_action do
-  #       raise "bad thing"
-  #     end
-  #   end
-
-  #   it "is ok" do
-  #     # expect { action.call! }.to raise_error
-  #     expect { action.call }.not_to raise_error
-  #     expect(action.call).not_to be_success
-  #   end
-  # end
 end

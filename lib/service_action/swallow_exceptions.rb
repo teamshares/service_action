@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
-# TODO: Open question: do we need to support run!? should that raise even if it's a user-facing error?
+module Interactor
+  class Failure < StandardError
+    def message
+      context.error || "Execution was intentionally stopped"
+    end
+  end
+end
 
 module ServiceAction
   module SwallowExceptions
@@ -32,6 +38,30 @@ module ServiceAction
 
         alias_method :original_run!, :run!
         alias_method :run!, :run_with_exception_swallowing!
+
+        # Tweaked to check @context.object_id rather than context (since forwarding object_id causes Ruby to complain)
+        def run
+          run!
+        rescue Interactor::Failure => e
+          if @context.object_id != e.context.object_id
+            raise
+          end
+        end
+
+        class << base
+          def call_bang_with_unswallowed_exceptions(context = {})
+            original_call!(context)
+          rescue Interactor::Failure => e
+            # De-swallow the exception, if we caught any failures
+            raise e.context.exception if e.context.exception
+
+            # Otherwise just raise the Interactor::Failure
+            raise
+          end
+
+          alias_method :original_call!, :call!
+          alias_method :call!, :call_bang_with_unswallowed_exceptions
+        end
 
         private
 

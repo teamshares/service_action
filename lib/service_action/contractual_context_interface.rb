@@ -212,10 +212,6 @@ module ServiceAction
         end
       end
 
-      # I HOPE this doesn't cause unexpected behavior -- we need this to avoid rescuing
-      # Failures arising from other contexts in Interactor#run
-      def object_id = @context.object_id
-
       def_delegators :@context, :success?, :failure?, :error, :exception
       def ok? = success?
 
