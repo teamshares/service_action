@@ -33,7 +33,7 @@ module ServiceAction
         fail_with([error_prefix, result.error].compact.join(" "))
       end
 
-      # NOTE: only override is passing @context rather than context (which is now a facade)
+      # NOTE: override to use the `depends_on` method (internally, replaces call! with call + overrides to use @context directly)
       def call
         self.class.organized.each do |interactor|
           depends_on interactor
