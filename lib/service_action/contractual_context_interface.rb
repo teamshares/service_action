@@ -50,33 +50,37 @@ module ServiceAction
     end
 
     module ClassMethods
-      def expects(field, allow_blank: false, default: nil, **additional_validations)
-        @inbound_accessors << field
+      def expects(*fields, allow_blank: false, default: nil, **additional_validations)
+        fields.map do |field|
+          @inbound_accessors << field
 
-        allow_blank = true if additional_validations.has_key?(:boolean) # If we're using the boolean validator, we need to allow blank to let false get through
-        @inbound_validations[field][:presence] = true unless allow_blank
+          allow_blank = true if additional_validations.has_key?(:boolean) # If we're using the boolean validator, we need to allow blank to let false get through
+          @inbound_validations[field][:presence] = true unless allow_blank
 
-        # TODO: do we need to merge allow_blank into all subsequent validations' options?
-        @inbound_validations[field].merge!(additional_validations) if additional_validations.present?
+          # TODO: do we need to merge allow_blank into all subsequent validations' options?
+          @inbound_validations[field].merge!(additional_validations) if additional_validations.present?
 
-        # Allow local access to explicitly-expected fields
-        define_method(field) { inbound_context.public_send(field) }
+          # Allow local access to explicitly-expected fields
+          define_method(field) { inbound_context.public_send(field) }
 
-        @inbound_defaults[field] = default if default.present?
+          @inbound_defaults[field] = default if default.present?
 
-        field
+          field
+        end
       end
 
-      def exposes(field, allow_blank: false, default: nil, **additional_validations)
-        @outbound_accessors << field
+      def exposes(*fields, allow_blank: false, default: nil, **additional_validations)
+        fields.map do |field|
+          @outbound_accessors << field
 
-        allow_blank = true if additional_validations.has_key?(:boolean) # If we're using the boolean validator, we need to allow blank to let false get through
-        @outbound_validations[field][:presence] = true unless allow_blank
-        @outbound_validations[field].merge!(additional_validations) if additional_validations.present?
+          allow_blank = true if additional_validations.has_key?(:boolean) # If we're using the boolean validator, we need to allow blank to let false get through
+          @outbound_validations[field][:presence] = true unless allow_blank
+          @outbound_validations[field].merge!(additional_validations) if additional_validations.present?
 
-        @outbound_defaults[field] = default if default.present?
+          @outbound_defaults[field] = default if default.present?
 
-        field
+          field
+        end
       end
     end
 

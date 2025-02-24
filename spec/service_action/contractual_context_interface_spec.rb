@@ -196,6 +196,28 @@ RSpec.describe "Validations" do
     end
   end
 
+  context "multiple fields validations per call" do
+    subject { interactor.call(foo:, bar: ) }
+
+    let(:foo) { 1 }
+    let(:bar) { 2 }
+
+    let(:interactor) do
+      build_interactor do
+        expects :foo, :bar, type: Numeric
+      end
+    end
+
+    context "when one invalid" do
+      let(:bar) { "string" }
+      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Bar is not a Numeric") }
+    end
+
+    context "when set" do
+      it { is_expected.to be_success }
+    end
+  end
+
   context "support optional outbound exposures" do
     subject { interactor.call(foo:) }
 
