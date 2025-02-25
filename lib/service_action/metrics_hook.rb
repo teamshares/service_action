@@ -15,7 +15,6 @@ module ServiceAction
 
     # TODO: clean this up (just trying to avoid error if downstream doesn't define metrics_hook)
     module InstanceMethods
-      # TODO: if we resolve load order issues we shouldn't need a separate hook at all
       def metrics_hook(interactor)
         super
       rescue NoMethodError

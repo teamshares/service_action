@@ -103,8 +103,6 @@ module ServiceAction
           kwargs.merge!(args.first => args.last)
         end
 
-        # TODO: handle collisions with already-existing vars!
-
         kwargs.each do |key, value|
           if outbound_context.respond_to?(key)
             @context.public_send("#{key}=", value)
