@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-# TODO: just use ActiveSupport::Delegate?
-require "forwardable"
 require "active_model"
+require "active_support/core_ext/enumerable"
 
 module ServiceAction
   class ContractViolationException < StandardError
@@ -21,10 +20,12 @@ module ServiceAction
   class InboundContractViolation < ContractViolationException; end
   class OutboundContractViolation < ContractViolationException; end
   class InvalidExposureAttempt < StandardError; end
+  class PreprocessingError < StandardError; end
 
   module ContractualContextInterface
     def self.included(base)
       base.class_eval do
+        @inbound_preprocessing ||= {}
         @inbound_accessors ||= []
         @outbound_accessors ||= []
         @inbound_defaults = {}
@@ -40,6 +41,7 @@ module ServiceAction
         remove_method :context
 
         around do |hooked|
+          apply_inbound_preprocessing!
           apply_inbound_defaults!
           validate_context!(:inbound)
           hooked.call
@@ -50,9 +52,10 @@ module ServiceAction
     end
 
     module ClassMethods
-      def expects(*fields, allow_blank: false, default: nil, **additional_validations)
+      def expects(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false, **additional_validations)
         fields.map do |field|
           @inbound_accessors << field
+          @inbound_preprocessing[field] = preprocess if preprocess.present?
 
           allow_blank = true if additional_validations.has_key?(:boolean) # If we're using the boolean validator, we need to allow blank to let false get through
           @inbound_validations[field][:presence] = true unless allow_blank
@@ -69,7 +72,7 @@ module ServiceAction
         end
       end
 
-      def exposes(*fields, allow_blank: false, default: nil, **additional_validations)
+      def exposes(*fields, allow_blank: false, default: nil, sensitive: false, **additional_validations)
         fields.map do |field|
           @outbound_accessors << field
 
@@ -115,6 +118,15 @@ module ServiceAction
     end
 
     module ValidationInstanceMethods
+      def apply_inbound_preprocessing!
+        self.class.instance_variable_get("@inbound_preprocessing").each do |field, processor|
+          new_value = processor.call(@context.public_send(field))
+          @context.public_send("#{field}=", new_value)
+        rescue => e
+          raise PreprocessingError, "Error preprocessing field '#{field}': #{e.message}"
+        end
+      end
+
       def apply_inbound_defaults!
         self.class.instance_variable_get("@inbound_defaults").each do |field, default_value|
           @context.public_send("#{field}=", default_value) unless @context.public_send(field)
@@ -199,15 +211,23 @@ module ServiceAction
         end
 
         singleton_class.define_method(:inspect) do
-          visible_fields = allowed_fields.map { |field| "#{field}: #{public_send(field).inspect}" }.join(", ")
+          visible_fields = allowed_fields.map do |field|
+            val = public_send(field)
+
+            # Avoid triggering reading full AR relation in inspect (i.e. avoid hydrating relation on error)
+            val = "#{val.name}::ActiveRecord_Relation" if val.class.name == "ActiveRecord::Relation"
+
+            "#{field}: #{val.inspect}"
+          end.join(", ")
+
           status = if direction == :outbound
                      ex_type = @context.exception ? "#{@context.exception.class.name}: " : ""
                      ex_msg = @context.exception ? @context.exception.message : @context.error
-                     %( [#{@context.success? ? "OK" : "failed with #{ex_type}'#{ex_msg}'"}])
+                     %{[#{@context.success? ? "OK" : "failed with #{ex_type}'#{ex_msg}'"}]}
                    end
           str = [status, visible_fields].compact_blank.join(" ")
 
-          "#<#{direction.to_s.capitalize}#{self.class.name.split("::").last}#{str}>"
+          "#<#{direction.to_s.capitalize}#{self.class.name.split("::").last} #{str}>"
         end
       end
 

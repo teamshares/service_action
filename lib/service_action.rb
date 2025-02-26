@@ -4,6 +4,8 @@ require_relative "service_action/version"
 
 require "interactor"
 
+require "active_support"
+
 require_relative "service_action/metrics_hook"
 require_relative "service_action/contractual_context_interface"
 require_relative "service_action/swallow_exceptions"

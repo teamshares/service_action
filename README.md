@@ -13,6 +13,8 @@ Just spinning this up -- not yet released (i.e. doc updates to come later).
     * enqueue! will go through normal sidekiq retries on any failure (including user-facing `fail_with`)
     * Note implicit GlobalID support (if not serializable, will get ArgumentError at callsite)
 
+* General note: the inbound/outbound contexts are views into an underlying shared object (passed down through organize calls) -- modifications of one will affect the other (e.g. preprocessing inbound args implicitly transforms them on the underlying context, which is echoed if you also expose it on outbound).
+
 ---
 
 TODO: Delete this and the text below, and describe your gem

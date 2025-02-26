@@ -3,6 +3,7 @@ PATH
   specs:
     service_action (0.1.0)
       activemodel (> 7.0)
+      activesupport (> 7.0)
       interactor (= 3.1.2)
 
 GEM

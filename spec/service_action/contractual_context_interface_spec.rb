@@ -242,4 +242,36 @@ RSpec.describe "Validations" do
       it { is_expected.to be_success }
     end
   end
+
+  describe "preprocessing" do
+    subject { interactor.call(date_as_date: input) }
+
+    let(:interactor) do
+      build_interactor do
+        expects :date_as_date, preprocess: ->(raw) { Date.parse(raw) }
+        exposes :date_as_date
+
+        def call
+          expose date_as_date:
+        end
+      end
+    end
+
+    context "when preprocessing is successful" do
+      let(:input) { "2020-01-01" }
+
+      it "modifies the context" do
+        is_expected.to be_success
+        expect(subject.date_as_date).to be_a(Date)
+      end
+    end
+
+    context "when preprocessing fails" do
+      let(:input) { "" }
+
+      it "raises" do
+        expect { subject}. to raise_error(ServiceAction::PreprocessingError)
+      end
+    end
+  end
 end
