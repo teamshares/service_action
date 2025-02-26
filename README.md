@@ -8,6 +8,10 @@ Just spinning this up -- not yet released (i.e. doc updates to come later).
 * Note we have two custom validations: boolean: true and the implicit type: foo.  (maybe with array of types?)
 * call! -- will raise any exceptions OR an Interactor::Failure (todo: namespace with our new gem?) if user-facing error occurred (otherwise non-bang will never raise)
     * note call! still logs completion even if failure (in TS::ServiceAction)
+* enqueue vs enqueue!
+    * enqueue will not retry even if fails
+    * enqueue! will go through normal sidekiq retries on any failure (including user-facing `fail_with`)
+    * Note implicit GlobalID support (if not serializable, will get ArgumentError at callsite)
 
 ---
 

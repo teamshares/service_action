@@ -13,7 +13,7 @@ module ServiceAction
         end
 
         define_method(:perform) do |*args|
-          context = args.first
+          context = self.class.params_from_global_id(args.first)
           bang = args.size > 1 ? args.last : false
 
           if bang
@@ -41,11 +41,31 @@ module ServiceAction
         def self.process_context_to_sidekiq_args(context)
           client = Sidekiq::Client.new
 
-          context.stringify_keys.tap do |args|
+          params_to_global_id(context).tap do |args|
             if client.send(:json_unsafe?, args).present?
-              raise ArgumentError, "Cannot pass non-JSON-serializable objects to Sidekiq. Make sure all objects in the context are serializable."
+              raise ArgumentError, "Cannot pass non-JSON-serializable objects to Sidekiq. Make sure all objects in the context are serializable (or respond to to_global_id)."
             end
           end
+        end
+
+        def self.params_to_global_id(context)
+          context.stringify_keys.each_with_object({}) do |(key, value), hash|
+            if value.respond_to?(:to_global_id)
+              hash["#{key}_as_global_id"] = value.to_global_id.to_s
+            else
+              hash[key] = value
+            end
+          end
+        end
+
+        def self.params_from_global_id(params)
+          params.each_with_object({}) do |(key, value), hash|
+            if key.end_with?("_as_global_id")
+              hash[key.delete_suffix("_as_global_id")] = GlobalID::Locator.locate(value)
+            else
+              hash[key] = value
+            end
+          end.symbolize_keys
         end
       end
     end

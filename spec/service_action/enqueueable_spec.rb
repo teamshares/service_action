@@ -30,7 +30,8 @@ RSpec.describe ServiceAction::Enqueueable, type: :worker do
       end
 
       it "calls the Interactor#call" do
-        expect(TestEnqueueableInteractor).to receive(:call).with(hash_including({ "this" => "this" }))
+        expect_any_instance_of(TestEnqueueableInteractor).to receive(:perform).with(hash_including({"this" => "this"})).and_call_original
+        expect(TestEnqueueableInteractor).to receive(:call).with(hash_including({ this: "this" }))
         subject
       end
     end
@@ -43,12 +44,33 @@ RSpec.describe ServiceAction::Enqueueable, type: :worker do
       end
 
       it "performs later" do
-        expect(TestEnqueueableInteractor).to receive(:call!).with(hash_including({ "name" => "Joe" }))
+        expect_any_instance_of(TestEnqueueableInteractor).to receive(:perform).with({"name" => "Joe", "address" => "123 Nope"}, true).and_call_original
+        expect(TestEnqueueableInteractor).to receive(:call!).with({name: "Joe", address: "123 Nope"})
         subject
       end
 
       it "sets the context with the passed-in hash args" do
         expect { subject }.to output("Name: Joe\nAddress: 123 Nope\n").to_stdout
+      end
+    end
+  end
+
+  describe "params" do
+    subject { AnotherEnqueueableInteractor.enqueue(foo:) }
+
+    context "with string" do
+      let(:foo) { "bar" }
+
+      it "doesn't raise" do
+        subject
+      end
+    end
+
+    context "with complex object" do
+      let(:foo) { AnotherEnqueueableInteractor }
+
+      it "raises" do
+        expect { subject }.to raise_error(ArgumentError, "Cannot pass non-JSON-serializable objects to Sidekiq. Make sure all objects in the context are serializable (or respond to to_global_id).")
       end
     end
   end

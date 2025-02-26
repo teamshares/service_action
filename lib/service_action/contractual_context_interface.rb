@@ -205,8 +205,9 @@ module ServiceAction
                      ex_msg = @context.exception ? @context.exception.message : @context.error
                      %( [#{@context.success? ? "OK" : "failed with #{ex_type}'#{ex_msg}'"}])
                    end
+          str = [status, visible_fields].compact_blank.join(" ")
 
-          "#<#{direction.to_s.capitalize}#{self.class.name.split("::").last}#{status} #{visible_fields}>"
+          "#<#{direction.to_s.capitalize}#{self.class.name.split("::").last}#{str}>"
         end
       end
 
