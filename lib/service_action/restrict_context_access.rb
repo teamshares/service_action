@@ -28,6 +28,7 @@ module ServiceAction
         @inbound_preprocessing ||= {}
         @inbound_accessors ||= []
         @outbound_accessors ||= []
+        @sensitive_fields ||= []
         @inbound_defaults = {}
         @outbound_defaults = {}
         @inbound_validations = Hash.new { |h, k| h[k] = {} }
@@ -57,6 +58,7 @@ module ServiceAction
         fields.map do |field|
           @inbound_accessors << field
           @inbound_preprocessing[field] = preprocess if preprocess.present?
+          @sensitive_fields << field if sensitive
 
           # If we're using the boolean validator, we need to allow blank to let false get through
           allow_blank = true if additional_validations.has_key?(:boolean)
@@ -77,6 +79,7 @@ module ServiceAction
       def exposes(*fields, allow_blank: false, default: nil, sensitive: false, **additional_validations)
         fields.map do |field|
           @outbound_accessors << field
+          @sensitive_fields << field if sensitive
 
           # If we're using the boolean validator, we need to allow blank to let false get through
           allow_blank = true if additional_validations.has_key?(:boolean)
@@ -197,6 +200,8 @@ module ServiceAction
       end
     end
 
+    require "active_support/parameter_filter"
+
     class ContextFacadeInspector
       def initialize(interactor:, facade:, context:, direction:)
         @interactor = interactor
@@ -220,22 +225,45 @@ module ServiceAction
         return "[OK]" if @context.success?
         return "[failed with '#{@context.error}']" unless @context.exception
 
-        %([failed with #{@context.exception.class.name}: '#{@context.exception.message}'}])
+        %([failed with #{@context.exception.class.name}: '#{@context.exception.message}'])
       end
 
       def visible_fields
         allowed_fields.map do |field|
-          val = @facade.public_send(field)
+          value = @facade.public_send(field)
 
-          # Avoid triggering reading full AR relation in inspect (i.e. avoid hydrating relation on error)
-          val = "#{val.name}::ActiveRecord_Relation" if val.class.name == "ActiveRecord::Relation"
-
-          "#{field}: #{val.inspect}"
+          "#{field}: #{format_for_inspect(field, value)}"
         end.join(", ")
       end
 
       def allowed_fields
         @interactor.class.instance_variable_get("@#{@direction}_accessors").compact
+      end
+
+      def sensitive_fields
+        @interactor.class.instance_variable_get("@sensitive_fields").compact
+      end
+
+      def format_for_inspect(field, value)
+        return value.inspect if value.nil?
+
+        # Initially based on https://github.com/rails/rails/blob/800976975253be2912d09a80757ee70a2bb1e984/activerecord/lib/active_record/attribute_methods.rb#L527
+        inspected_value = if value.is_a?(String) && value.length > 50
+                            "#{value[0, 50]}...".inspect
+                          elsif value.is_a?(Date) || value.is_a?(Time)
+                            %("#{value.to_fs(:inspect)}")
+                          elsif value.class.name == "ActiveRecord::Relation"
+                            # Avoid hydrating full AR relation (i.e. avoid loading records just to report an error)
+                            "#{value.name}::ActiveRecord_Relation"
+                          else
+                            value.inspect
+                          end
+
+        inspection_filter.filter_param(field, inspected_value)
+      end
+
+      def inspection_filter
+        @inspection_filter ||= ActiveSupport::ParameterFilter.new(sensitive_fields)
       end
     end
 
