@@ -7,6 +7,7 @@ require "interactor"
 require "active_support"
 
 require_relative "service_action/metrics_hook"
+require_relative "service_action/logging"
 require_relative "service_action/contractual_context_interface"
 require_relative "service_action/swallow_exceptions"
 
@@ -18,7 +19,11 @@ module ServiceAction
     base.class_eval do
       include Interactor
 
-      # NOTE: first include, so we start the trace before we do anything else (like contract validation)
+      # Include first so other modules can assume `log` is available
+      include Logging
+
+      # NOTE: include before any others that set hooks (like contract validation), so we
+      # can include those hook executions in any traces set from this hook.
       include MetricsHook
 
       include ContractualContextInterface
