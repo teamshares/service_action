@@ -197,6 +197,48 @@ module ServiceAction
       end
     end
 
+    class ContextFacadeInspector
+      def initialize(interactor:, facade:, context:, direction:)
+        @interactor = interactor
+        @facade = facade
+        @context = context
+        @direction = direction
+      end
+
+      def class_name = "#{@direction.to_s.capitalize}ContextFacade"
+
+      def call
+        str = [status, visible_fields].compact_blank.join(" ")
+
+        "#<#{@direction.to_s.capitalize}ContextFacade #{str}>"
+      end
+
+      private
+
+      def status
+        return unless @direction == :outbound
+        return "[OK]" if @context.success?
+        return "[failed with '#{@context.error}']" unless @context.exception
+
+        %([failed with #{@context.exception.class.name}: '#{@context.exception.message}'}])
+      end
+
+      def visible_fields
+        allowed_fields.map do |field|
+          val = @facade.public_send(field)
+
+          # Avoid triggering reading full AR relation in inspect (i.e. avoid hydrating relation on error)
+          val = "#{val.name}::ActiveRecord_Relation" if val.class.name == "ActiveRecord::Relation"
+
+          "#{field}: #{val.inspect}"
+        end.join(", ")
+      end
+
+      def allowed_fields
+        @interactor.class.instance_variable_get("@#{@direction}_accessors").compact
+      end
+    end
+
     class ContextFacade
       class ContextMethodNotAllowed < NoMethodError; end
 
@@ -207,31 +249,15 @@ module ServiceAction
         @direction = direction
         @interactor = interactor
 
-        allowed_fields = @interactor.class.instance_variable_get("@#{direction}_accessors")
+        allowed_fields = @interactor.class.instance_variable_get("@#{direction}_accessors").compact
 
-        allowed_fields.compact.each do |field|
+        allowed_fields.each do |field|
           singleton_class.define_method(field) { @context.public_send(field) }
         end
+      end
 
-        singleton_class.define_method(:inspect) do
-          visible_fields = allowed_fields.map do |field|
-            val = public_send(field)
-
-            # Avoid triggering reading full AR relation in inspect (i.e. avoid hydrating relation on error)
-            val = "#{val.name}::ActiveRecord_Relation" if val.class.name == "ActiveRecord::Relation"
-
-            "#{field}: #{val.inspect}"
-          end.join(", ")
-
-          status = if direction == :outbound
-                     ex_type = @context.exception ? "#{@context.exception.class.name}: " : ""
-                     ex_msg = @context.exception ? @context.exception.message : @context.error
-                     %([#{@context.success? ? "OK" : "failed with #{ex_type}'#{ex_msg}'"}])
-                   end
-          str = [status, visible_fields].compact_blank.join(" ")
-
-          "#<#{direction.to_s.capitalize}#{self.class.name.split("::").last} #{str}>"
-        end
+      def inspect
+        ContextFacadeInspector.new(interactor: @interactor, facade: self, context: @context, direction: @direction).call
       end
 
       def_delegators :@context, :success?, :failure?, :error, :exception

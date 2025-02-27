@@ -22,12 +22,11 @@ RSpec.describe "Validations" do
   end
 
   context "when successful" do
-    subject { interactor.call(foo: 11, bar: 12, baz: 13) }
+    subject(:result) { interactor.call(foo: 11, bar: 12, baz: 13) }
 
     it "creates accessor" do
       is_expected.to be_success
       is_expected.to be_a(ServiceAction::RestrictContextAccess::ContextFacade)
-      expect(subject.inspect).to eq("#<OutboundContextFacade [OK] bar: 12>")
 
       # Defined on context and allowed by outbound facade
       expect(subject.bar).to eq 12
@@ -44,6 +43,12 @@ RSpec.describe "Validations" do
 
       # Not defined at all on context
       expect { subject.quz }.to raise_error(NoMethodError)
+    end
+
+    describe "#inspect" do
+      subject { result.inspect }
+
+      it { is_expected.to eq("#<OutboundContextFacade [OK] bar: 12>") }
     end
   end
 
