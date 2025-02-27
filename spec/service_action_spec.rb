@@ -66,7 +66,7 @@ RSpec.describe ServiceAction do
       it {
         expect do
           subject.foo
-        end.to raise_error(ServiceAction::ContractualContextInterface::ContextFacade::ContextMethodNotAllowed)
+        end.to raise_error(ServiceAction::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
       }
     end
 
@@ -190,7 +190,7 @@ RSpec.describe ServiceAction do
     it "is not ok" do
       is_expected.not_to be_success
       expect(subject.error).to eq("Something went wrong")
-      expect(subject.exception).to be_a(ServiceAction::ContractualContextInterface::ContextFacade::ContextMethodNotAllowed)
+      expect(subject.exception).to be_a(ServiceAction::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
       expect(subject.exception.message).to eq "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
     end
   end

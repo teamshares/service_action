@@ -22,7 +22,7 @@ module ServiceAction
   class InvalidExposureAttempt < StandardError; end
   class PreprocessingError < StandardError; end
 
-  module ContractualContextInterface
+  module RestrictContextAccess
     def self.included(base)
       base.class_eval do
         @inbound_preprocessing ||= {}
@@ -52,12 +52,14 @@ module ServiceAction
     end
 
     module ClassMethods
-      def expects(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false, **additional_validations)
+      def expects(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false,
+                  **additional_validations)
         fields.map do |field|
           @inbound_accessors << field
           @inbound_preprocessing[field] = preprocess if preprocess.present?
 
-          allow_blank = true if additional_validations.has_key?(:boolean) # If we're using the boolean validator, we need to allow blank to let false get through
+          # If we're using the boolean validator, we need to allow blank to let false get through
+          allow_blank = true if additional_validations.has_key?(:boolean)
           @inbound_validations[field][:presence] = true unless allow_blank
 
           # TODO: do we need to merge allow_blank into all subsequent validations' options?
@@ -76,7 +78,8 @@ module ServiceAction
         fields.map do |field|
           @outbound_accessors << field
 
-          allow_blank = true if additional_validations.has_key?(:boolean) # If we're using the boolean validator, we need to allow blank to let false get through
+          # If we're using the boolean validator, we need to allow blank to let false get through
+          allow_blank = true if additional_validations.has_key?(:boolean)
           @outbound_validations[field][:presence] = true unless allow_blank
           @outbound_validations[field].merge!(additional_validations) if additional_validations.present?
 
@@ -122,7 +125,7 @@ module ServiceAction
         self.class.instance_variable_get("@inbound_preprocessing").each do |field, processor|
           new_value = processor.call(@context.public_send(field))
           @context.public_send("#{field}=", new_value)
-        rescue => e
+        rescue StandardError => e
           raise PreprocessingError, "Error preprocessing field '#{field}': #{e.message}"
         end
       end
@@ -188,7 +191,7 @@ module ServiceAction
 
           types = options[:in] || Array(options[:with])
 
-          msg = types.size == 1 ? "is not a #{types.first}" : "is not one of #{types.join(', ')}"
+          msg = types.size == 1 ? "is not a #{types.first}" : "is not one of #{types.join(", ")}"
           record.errors.add attribute, (options[:message] || msg) unless types.any? { |type| value.is_a?(type) }
         end
       end
@@ -223,7 +226,7 @@ module ServiceAction
           status = if direction == :outbound
                      ex_type = @context.exception ? "#{@context.exception.class.name}: " : ""
                      ex_msg = @context.exception ? @context.exception.message : @context.error
-                     %{[#{@context.success? ? "OK" : "failed with #{ex_type}'#{ex_msg}'"}]}
+                     %([#{@context.success? ? "OK" : "failed with #{ex_type}'#{ex_msg}'"}])
                    end
           str = [status, visible_fields].compact_blank.join(" ")
 
@@ -234,7 +237,8 @@ module ServiceAction
       def_delegators :@context, :success?, :failure?, :error, :exception
       def ok? = success?
 
-      def fail!(...) = raise ContextMethodNotAllowed, "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
+      def fail!(...) = raise ContextMethodNotAllowed,
+                             "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
 
       private
 

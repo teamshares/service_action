@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require "service_action/contractual_context_interface"
+require "service_action/restrict_context_access"
 
 RSpec.describe "Validations" do
   def build_interactor(&block)
     interactor = Class.new.send(:include, Interactor)
-    interactor = interactor.send(:include, ServiceAction::ContractualContextInterface)
+    interactor = interactor.send(:include, ServiceAction::RestrictContextAccess)
     interactor.class_eval(&block) if block
     interactor
   end
@@ -26,7 +26,7 @@ RSpec.describe "Validations" do
 
     it "creates accessor" do
       is_expected.to be_success
-      is_expected.to be_a(ServiceAction::ContractualContextInterface::ContextFacade)
+      is_expected.to be_a(ServiceAction::RestrictContextAccess::ContextFacade)
       expect(subject.inspect).to eq("#<OutboundContextFacade [OK] bar: 12>")
 
       # Defined on context and allowed by outbound facade
@@ -35,12 +35,12 @@ RSpec.describe "Validations" do
       # Defined on context, but only allowed on inbound facade
       expect do
         subject.foo
-      end.to raise_error(ServiceAction::ContractualContextInterface::ContextFacade::ContextMethodNotAllowed)
+      end.to raise_error(ServiceAction::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
 
       # Defined on context, but blocked by facade
       expect do
         subject.baz
-      end.to raise_error(ServiceAction::ContractualContextInterface::ContextFacade::ContextMethodNotAllowed)
+      end.to raise_error(ServiceAction::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
 
       # Not defined at all on context
       expect { subject.quz }.to raise_error(NoMethodError)
@@ -167,7 +167,11 @@ RSpec.describe "Validations" do
 
     context "when invalid" do
       let(:foo) { Object.new }
-      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Foo is not one of String, Numeric") }
+      it {
+        expect do
+          subject
+        end.to raise_error(ServiceAction::InboundContractViolation, "Foo is not one of String, Numeric")
+      }
     end
 
     context "when false" do
@@ -197,7 +201,7 @@ RSpec.describe "Validations" do
   end
 
   context "multiple fields validations per call" do
-    subject { interactor.call(foo:, bar: ) }
+    subject { interactor.call(foo:, bar:) }
 
     let(:foo) { 1 }
     let(:bar) { 2 }
@@ -270,7 +274,7 @@ RSpec.describe "Validations" do
       let(:input) { "" }
 
       it "raises" do
-        expect { subject}. to raise_error(ServiceAction::PreprocessingError)
+        expect { subject }.to raise_error(ServiceAction::PreprocessingError)
       end
     end
   end

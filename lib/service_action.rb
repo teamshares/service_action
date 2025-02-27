@@ -8,7 +8,7 @@ require "active_support"
 
 require_relative "service_action/metrics_hook"
 require_relative "service_action/logging"
-require_relative "service_action/contractual_context_interface"
+require_relative "service_action/restrict_context_access"
 require_relative "service_action/swallow_exceptions"
 
 require_relative "service_action/organizer"
@@ -26,7 +26,7 @@ module ServiceAction
       # can include those hook executions in any traces set from this hook.
       include MetricsHook
 
-      include ContractualContextInterface
+      include RestrictContextAccess
       include SwallowExceptions
 
       include Enqueueable
