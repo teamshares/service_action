@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "active_support/core_ext/module/delegation"
+
 module ServiceAction
   module Logging
     def self.included(base)
@@ -27,9 +29,7 @@ module ServiceAction
     end
 
     module InstanceMethods
-      def log(message, level: :info)
-        self.class.log(message, level:)
-      end
+      delegate :log, to: :class
     end
   end
 end

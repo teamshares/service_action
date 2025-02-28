@@ -2,6 +2,7 @@
 
 require "active_model"
 require "active_support/core_ext/enumerable"
+require "active_support/core_ext/module/delegation"
 
 module ServiceAction
   class ContractViolationException < StandardError
@@ -283,8 +284,6 @@ module ServiceAction
     class ContextFacade
       class ContextMethodNotAllowed < NoMethodError; end
 
-      extend Forwardable
-
       def initialize(interactor, direction, context)
         @context = context
         @direction = direction
@@ -303,7 +302,7 @@ module ServiceAction
         ContextFacadeInspector.new(interactor: @interactor, facade: self, context: @context, direction: @direction).call
       end
 
-      def_delegators :@context, :success?, :failure?, :error, :exception
+      delegate :success?, :failure?, :error, :exception, to: :@context
       def ok? = success?
 
       def fail!(...) = raise ContextMethodNotAllowed,
