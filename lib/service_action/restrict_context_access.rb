@@ -167,8 +167,15 @@ module ServiceAction
         raise exception_klass, validator.errors
       end
 
-      def context_for_logging
-        inspection_filter.filter(@context.to_h.slice(*loggable_fields))
+      def context_for_logging(direction = nil)
+        fields = case direction
+                 when :inbound then self.class.instance_variable_get("@inbound_accessors")
+                 when :outbound then self.class.instance_variable_get("@outbound_accessors")
+                 else
+                   self.class.instance_variable_get("@inbound_accessors") + self.class.instance_variable_get("@outbound_accessors")
+                 end
+
+        inspection_filter.filter(@context.to_h.slice(*fields))
       end
 
       protected
@@ -179,10 +186,6 @@ module ServiceAction
 
       def sensitive_fields
         self.class.instance_variable_get("@sensitive_fields").compact
-      end
-
-      def loggable_fields
-        self.class.instance_variable_get("@inbound_accessors").compact + self.class.instance_variable_get("@outbound_accessors").compact
       end
     end
 
