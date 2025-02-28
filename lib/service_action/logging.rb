@@ -4,6 +4,8 @@ require "active_support/core_ext/module/delegation"
 
 module ServiceAction
   module Logging
+    LEVELS = %i[debug info warn error fatal].freeze
+
     def self.included(base)
       base.class_eval do
         extend ClassMethods
@@ -13,9 +15,21 @@ module ServiceAction
 
     module ClassMethods
       def log(message, level: :info)
+        level = :info if level == :debug && targeted_for_debug_logging?
         msg = %([#{name || "Anonymous Class"}] #{message})
 
         logger.send(level, msg)
+      end
+
+      LEVELS.each do |level|
+        define_method(level) do |message|
+          log(message, level: level)
+        end
+      end
+
+      def targeted_for_debug_logging?
+        target_class_names = (ENV["SA_DEBUG_TARGETS"] || "").split(",").map(&:strip)
+        target_class_names.include?(name)
       end
 
       # Hook for implementing classes to override logger
@@ -29,7 +43,7 @@ module ServiceAction
     end
 
     module InstanceMethods
-      delegate :log, to: :class
+      delegate :log, *LEVELS, to: :class
     end
   end
 end
