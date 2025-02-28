@@ -166,6 +166,24 @@ module ServiceAction
         exception_klass = direction == :inbound ? InboundContractViolation : OutboundContractViolation
         raise exception_klass, validator.errors
       end
+
+      def context_for_logging
+        inspection_filter.filter(@context.to_h.slice(*loggable_fields))
+      end
+
+      protected
+
+      def inspection_filter
+        @inspection_filter ||= ActiveSupport::ParameterFilter.new(sensitive_fields)
+      end
+
+      def sensitive_fields
+        self.class.instance_variable_get("@sensitive_fields").compact
+      end
+
+      def loggable_fields
+        self.class.instance_variable_get("@inbound_accessors").compact + self.class.instance_variable_get("@outbound_accessors").compact
+      end
     end
 
     # TODO: this does not appear to be thread safe -- clearing validations whenever setting -_-
@@ -236,13 +254,7 @@ module ServiceAction
         end.join(", ")
       end
 
-      def allowed_fields
-        @interactor.class.instance_variable_get("@#{@direction}_accessors").compact
-      end
-
-      def sensitive_fields
-        @interactor.class.instance_variable_get("@sensitive_fields").compact
-      end
+      def allowed_fields = @facade.allowed_fields
 
       def format_for_inspect(field, value)
         return value.inspect if value.nil?
@@ -262,9 +274,7 @@ module ServiceAction
         inspection_filter.filter_param(field, inspected_value)
       end
 
-      def inspection_filter
-        @inspection_filter ||= ActiveSupport::ParameterFilter.new(sensitive_fields)
-      end
+      def inspection_filter = @interactor.inspection_filter
     end
 
     class ContextFacade
@@ -277,9 +287,9 @@ module ServiceAction
         @direction = direction
         @interactor = interactor
 
-        allowed_fields = @interactor.class.instance_variable_get("@#{direction}_accessors").compact
+        @allowed_fields = @interactor.class.instance_variable_get("@#{direction}_accessors").compact
 
-        allowed_fields.each do |field|
+        @allowed_fields.each do |field|
           singleton_class.define_method(field) { @context.public_send(field) }
         end
       end

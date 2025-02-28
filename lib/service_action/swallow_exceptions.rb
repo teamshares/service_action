@@ -23,7 +23,8 @@ module ServiceAction
           # Add custom hook for intercepting exceptions (e.g. Teamshares automatically logs to Honeybadger)
           if self.class.respond_to?(:on_exception)
             begin
-              self.class.on_exception(e, context: @context.to_h)
+              self.class.on_exception(e,
+                                      context: respond_to?(:context_for_logging) ? context_for_logging : @context.to_h)
             rescue StandardError
               # No action needed (on_exception should log any internal failures), but we don't want
               # exception *handling* failures to cascade and overwrite the original exception.
@@ -43,9 +44,7 @@ module ServiceAction
         def run
           run!
         rescue Interactor::Failure => e
-          if @context.object_id != e.context.object_id
-            raise
-          end
+          raise if @context.object_id != e.context.object_id
         end
 
         class << base
