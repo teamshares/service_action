@@ -37,7 +37,9 @@ module ServiceAction
         @logger ||= begin
           Rails.logger
         rescue NameError
-          Logger.new($stdout)
+          Logger.new($stdout).tap do |l|
+            l.level = Logger::INFO
+          end
         end
       end
     end

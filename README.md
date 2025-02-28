@@ -4,6 +4,7 @@ Just spinning this up -- not yet released (i.e. doc updates to come later).
 
 ## Notes
 * Define `metrics_hook` on base class to enable metrics tracking
+    update: define `metrics_hook_wrapper` (better naming) to enable additional tracking (get debug start/stop by default)
 * Define `generic_error_message` on the interactor _class_ to override what gets set on result.error when exceptions caught
 * Note we have two custom validations: boolean: true and the implicit type: foo.  (maybe with array of types?)
 * call! -- will raise any exceptions OR an Interactor::Failure (todo: namespace with our new gem?) if user-facing error occurred (otherwise non-bang will never raise)
@@ -21,6 +22,8 @@ Just spinning this up -- not yet released (i.e. doc updates to come later).
 * feature: `noncritical do` - within this block, any exceptions will be logged (on_exception handler), but will NOT fail the interactor
     edge case: `fail_with` _will_ still fail the parent interactor
 * logging - all entrance/exit logged by default at debug level. can set logger level, or define class method targeted_for_debug_logging? = true, or set the env var... (Ability to toggle on debug logging for any specific actor without going through CI run.)
+
+
 ---
 
 TODO: Delete this and the text below, and describe your gem

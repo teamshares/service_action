@@ -13,7 +13,8 @@ RSpec.describe ServiceAction::Enqueueable, type: :worker do
       end
 
       it "sets the options" do
-        expect(TestEnqueueableInteractor.sidekiq_options_hash).to include("retry" => 10, "queue" => "default", "retry_queue" => "low")
+        expect(TestEnqueueableInteractor.sidekiq_options_hash).to include("retry" => 10, "queue" => "default",
+                                                                          "retry_queue" => "low")
       end
 
       it "performs later" do
@@ -30,7 +31,7 @@ RSpec.describe ServiceAction::Enqueueable, type: :worker do
       end
 
       it "calls the Interactor#call" do
-        expect_any_instance_of(TestEnqueueableInteractor).to receive(:perform).with(hash_including({"this" => "this"})).and_call_original
+        expect_any_instance_of(TestEnqueueableInteractor).to receive(:perform).with(hash_including({ "this" => "this" })).and_call_original
         expect(TestEnqueueableInteractor).to receive(:call).with(hash_including({ this: "this" }))
         subject
       end
@@ -44,13 +45,15 @@ RSpec.describe ServiceAction::Enqueueable, type: :worker do
       end
 
       it "performs later" do
-        expect_any_instance_of(TestEnqueueableInteractor).to receive(:perform).with({"name" => "Joe", "address" => "123 Nope"}, true).and_call_original
-        expect(TestEnqueueableInteractor).to receive(:call!).with({name: "Joe", address: "123 Nope"})
+        expect_any_instance_of(TestEnqueueableInteractor).to receive(:perform).with(
+          { "name" => "Joe", "address" => "123 Nope" }, true
+        ).and_call_original
+        expect(TestEnqueueableInteractor).to receive(:call!).with({ name: "Joe", address: "123 Nope" })
         subject
       end
 
       it "sets the context with the passed-in hash args" do
-        expect { subject }.to output("Name: Joe\nAddress: 123 Nope\n").to_stdout
+        expect { subject }.to output(/Name: Joe\nAddress: 123 Nope\n/).to_stdout
       end
     end
   end
@@ -70,7 +73,10 @@ RSpec.describe ServiceAction::Enqueueable, type: :worker do
       let(:foo) { AnotherEnqueueableInteractor }
 
       it "raises" do
-        expect { subject }.to raise_error(ArgumentError, "Cannot pass non-JSON-serializable objects to Sidekiq. Make sure all objects in the context are serializable (or respond to to_global_id).")
+        expect do
+          subject
+        end.to raise_error(ArgumentError,
+                           "Cannot pass non-JSON-serializable objects to Sidekiq. Make sure all objects in the context are serializable (or respond to to_global_id).")
       end
     end
   end
@@ -90,11 +96,12 @@ RSpec.describe ServiceAction::Enqueueable, type: :worker do
       end
 
       it "sets the options" do
-        expect(TestEnqueueableOrganizer.sidekiq_options_hash).to include("retry" => 2, "queue" => "high", "retry_queue" => "medium")
+        expect(TestEnqueueableOrganizer.sidekiq_options_hash).to include("retry" => 2, "queue" => "high",
+                                                                         "retry_queue" => "medium")
       end
 
       it "sets the context with the passed-in hash args and calls all included Interactors" do
-        expect { subject }.to output("Name: Joe\nAddress: 123 Nope\nAnother Interactor: bar\n").to_stdout
+        expect { subject }.to output(/Name: Joe\nAddress: 123 Nope.+?Another Interactor: bar\n/m).to_stdout
       end
     end
   end
