@@ -6,6 +6,7 @@ require "interactor"
 
 require "active_support"
 
+require_relative "service_action/configuration"
 require_relative "service_action/metrics_hook"
 require_relative "service_action/logging"
 require_relative "service_action/restrict_context_access"

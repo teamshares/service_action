@@ -5,6 +5,11 @@ Just spinning this up -- not yet released (i.e. doc updates to come later).
 ## Notes
 * Define `metrics_hook` on base class to enable metrics tracking
     update: define `metrics_hook_wrapper` (better naming) to enable additional tracking (get debug start/stop by default)
+    set up configuration to log at info level for all:
+    ServiceAction.configure do |c|
+      c.global_debug_logging = false
+    end
+
 * Define `generic_error_message` on the interactor _class_ to override what gets set on result.error when exceptions caught
 * Note we have two custom validations: boolean: true and the implicit type: foo.  (maybe with array of types?)
 * call! -- will raise any exceptions OR an Interactor::Failure (todo: namespace with our new gem?) if user-facing error occurred (otherwise non-bang will never raise)

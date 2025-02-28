@@ -28,6 +28,8 @@ module ServiceAction
       end
 
       def targeted_for_debug_logging?
+        return true if ServiceAction.config.global_debug_logging?
+
         target_class_names = (ENV["SA_DEBUG_TARGETS"] || "").split(",").map(&:strip)
         target_class_names.include?(name)
       end
