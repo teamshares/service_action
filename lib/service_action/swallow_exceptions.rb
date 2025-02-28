@@ -10,11 +10,10 @@ end
 
 module ServiceAction
   module SwallowExceptions
-    GENERIC_ERROR_MESSAGE = "Something went wrong"
-
     def self.included(base)
       base.class_eval do
         include InstanceMethods
+        extend ClassMethods
 
         def run_with_exception_swallowing!
           original_run!
@@ -27,8 +26,7 @@ module ServiceAction
 
           @context.exception = e
 
-          msg = self.class.respond_to?(:generic_error_message) ? self.class.generic_error_message : GENERIC_ERROR_MESSAGE
-          fail_with(msg)
+          fail_with(self.class.determine_error_message_for(e))
         end
 
         alias_method :original_run!, :run!
@@ -66,6 +64,55 @@ module ServiceAction
           alias_method :call!, :call_bang_with_unswallowed_exceptions
         end
       end
+    end
+
+    module ClassMethods
+      def error_for(*args, **kwargs)
+        if args.any?
+          if args.size != 2
+            raise ArgumentError,
+                  "error_for must be called with either two positional arguments or a hash of key/value pairs"
+          end
+
+          kwargs.merge!(args.first => args.last)
+        end
+
+        unless kwargs.keys.all? do |k|
+          k.is_a?(Class) || k.is_a?(String) || k.is_a?(Symbol)
+        end
+          raise ArgumentError,
+                "error_for keys must be exception class names (or the classes themselves)"
+        end
+
+        unless kwargs.values.all? do |k|
+          k.is_a?(String) || k.respond_to?(:call)
+        end
+          raise ArgumentError,
+                "error_for values must be strings (the message to return) or callable"
+        end
+
+        @message_by_exception_klass = (@message_by_exception_klass || {}).merge(kwargs.stringify_keys)
+      end
+
+      GENERIC_ERROR_MESSAGE = "Something went wrong"
+
+      def determine_error_message_for(exception)
+        custom = (@message_by_exception_klass || {})[exception.class.to_s]
+
+        if custom.respond_to?(:call)
+          begin
+            return custom.call(exception)
+          rescue StandardError
+            nil
+          end
+        elsif custom.present?
+          return custom
+        end
+
+        generic_error_message
+      end
+
+      def generic_error_message = GENERIC_ERROR_MESSAGE
     end
 
     module InstanceMethods

@@ -11,6 +11,7 @@ require_relative "service_action/metrics_hook"
 require_relative "service_action/logging"
 require_relative "service_action/restrict_context_access"
 require_relative "service_action/swallow_exceptions"
+require_relative "service_action/depends_on"
 
 require_relative "service_action/organizer"
 require_relative "service_action/enqueueable"
@@ -29,6 +30,8 @@ module ServiceAction
 
       include RestrictContextAccess
       include SwallowExceptions
+
+      include DependsOn
 
       include Enqueueable
     end

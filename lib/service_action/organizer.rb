@@ -25,18 +25,10 @@ module ServiceAction
     end
 
     module InstanceMethods
-      # TODO: extract to own layer (and - maybe don't take direct call, decompose instead?)
-      def depends_on(interactor, error_prefix: nil)
-        result = interactor.call(@context)
-        return if result.success?
-
-        fail_with([error_prefix, result.error].compact.join(" "))
-      end
-
       # NOTE: override to use the `depends_on` method (internally, replaces call! with call + overrides to use @context directly)
       def call
         self.class.organized.each do |interactor|
-          depends_on interactor
+          depends_on { interactor.call(@context) }
         end
       end
     end

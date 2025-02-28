@@ -213,13 +213,13 @@ RSpec.describe "Validations" do
 
     let(:interactor) do
       build_interactor do
-        expects :foo, :bar, type: Numeric
+        expects :foo, :bar, type: { with: Numeric, message: "should numberz" }
       end
     end
 
     context "when one invalid" do
       let(:bar) { "string" }
-      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Bar is not a Numeric") }
+      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Bar should numberz") }
     end
 
     context "when set" do
@@ -257,7 +257,7 @@ RSpec.describe "Validations" do
 
     let(:interactor) do
       build_interactor do
-        expects :date_as_date, preprocess: ->(raw) { Date.parse(raw) }
+        expects :date_as_date, type: Date, preprocess: ->(raw) { Date.parse(raw) }
         exposes :date_as_date
 
         def call
@@ -281,6 +281,26 @@ RSpec.describe "Validations" do
       it "raises" do
         expect { subject }.to raise_error(ServiceAction::PreprocessingError)
       end
+    end
+  end
+
+  describe "with custom validations" do
+    subject { interactor.call(foo:) }
+
+    let(:interactor) do
+      build_interactor do
+        expects :foo, validate: ->(value) { "must be pretty big" unless value > 10 }
+      end
+    end
+
+    context "when valid" do
+      let(:foo) { 20 }
+      it { is_expected.to be_success }
+    end
+
+    context "when invalid" do
+      let(:foo) { 10 }
+      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Foo must be pretty big") }
     end
   end
 end

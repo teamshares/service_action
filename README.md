@@ -11,7 +11,11 @@ Just spinning this up -- not yet released (i.e. doc updates to come later).
     end
 
 * Define `generic_error_message` on the interactor _class_ to override what gets set on result.error when exceptions caught
+    Also supports per-exception customization:
+        `error_for ServiceAction::InboundContractViolation, "some msg"`
+        `error_for ServiceAction::InboundContractViolation => "other message"`
 * Note we have two custom validations: boolean: true and the implicit type: foo.  (maybe with array of types?)
+    Note a third allows custom validations: `expects :foo, validate: ->(value) { "must be pretty big" unless value > 10 }` (error raised if any string returned OR if it raises an exception)
 * call! -- will raise any exceptions OR an Interactor::Failure (todo: namespace with our new gem?) if user-facing error occurred (otherwise non-bang will never raise)
     * note call! still logs completion even if failure (in TS::ServiceAction)
 * enqueue vs enqueue!

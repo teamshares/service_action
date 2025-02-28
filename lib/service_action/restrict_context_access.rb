@@ -202,6 +202,20 @@ module ServiceAction
         @context.public_send(attr)
       end
 
+      # Allow for custom validators to be defined in the context of the interactor
+      class ValidateValidator < ActiveModel::EachValidator
+        def validate_each(record, attribute, value)
+          msg = begin
+            options[:with].call(value)
+          rescue StandardError => e
+            # TODO: log this error?
+            "failed validation: #{e.message}"
+          end
+
+          record.errors.add(attribute, msg) if msg.present?
+        end
+      end
+
       class BooleanValidator < ActiveModel::EachValidator
         def validate_each(record, attribute, value)
           return if [true, false].include?(value)

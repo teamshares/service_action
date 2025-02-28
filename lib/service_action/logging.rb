@@ -9,7 +9,7 @@ module ServiceAction
     def self.included(base)
       base.class_eval do
         extend ClassMethods
-        include InstanceMethods
+        delegate :log, *LEVELS, to: :class
       end
     end
 
@@ -44,10 +44,6 @@ module ServiceAction
           end
         end
       end
-    end
-
-    module InstanceMethods
-      delegate :log, *LEVELS, to: :class
     end
   end
 end
