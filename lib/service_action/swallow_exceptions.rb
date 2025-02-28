@@ -14,22 +14,16 @@ module ServiceAction
 
     def self.included(base)
       base.class_eval do
+        include InstanceMethods
+
         def run_with_exception_swallowing!
           original_run!
         rescue Interactor::Failure => e
-          # NOTE: pretty sure we just want to re-raise these (so we don't hit the unexpected-error case below)
+          # Just re-raise these (so we don't hit the unexpected-error case below)
           raise e
         rescue StandardError => e
           # Add custom hook for intercepting exceptions (e.g. Teamshares automatically logs to Honeybadger)
-          if self.class.respond_to?(:on_exception)
-            begin
-              self.class.on_exception(e,
-                                      context: respond_to?(:context_for_logging) ? context_for_logging : @context.to_h)
-            rescue StandardError
-              # No action needed (on_exception should log any internal failures), but we don't want
-              # exception *handling* failures to cascade and overwrite the original exception.
-            end
-          end
+          trigger_on_exception(e)
 
           @context.exception = e
 
@@ -47,6 +41,16 @@ module ServiceAction
           raise if @context.object_id != e.context.object_id
         end
 
+        def trigger_on_exception(e)
+          return unless self.class.respond_to?(:on_exception)
+
+          self.class.on_exception(e, context: respond_to?(:context_for_logging) ? context_for_logging : @context.to_h)
+        rescue StandardError => e
+          # No action needed -- downstream #on_exception implementation should ideally log any internal failures, but
+          # we don't want exception *handling* failures to cascade and overwrite the original exception.
+          log("#{e.class.name} in on_exception hook: #{e.message}", :warn)
+        end
+
         class << base
           def call_bang_with_unswallowed_exceptions(context = {})
             original_call!(context)
@@ -61,13 +65,24 @@ module ServiceAction
           alias_method :original_call!, :call!
           alias_method :call!, :call_bang_with_unswallowed_exceptions
         end
+      end
+    end
 
-        private
+    module InstanceMethods
+      private
 
-        def fail_with(message)
-          # TODO: implement this centrally
-          @context.fail!(error: message)
-        end
+      def fail_with(message)
+        # TODO: implement this centrally
+        @context.fail!(error: message)
+      end
+
+      def noncritical
+        yield
+      rescue Interactor::Failure => e
+        # NOTE: reraising so we can still fail_with from inside the block
+        raise e
+      rescue StandardError => e
+        trigger_on_exception(e)
       end
     end
   end

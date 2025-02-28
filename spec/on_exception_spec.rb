@@ -35,4 +35,38 @@ RSpec.describe ServiceAction do
       is_expected.not_to be_success
     end
   end
+
+  describe "#noncritical" do
+    subject { interactor.call }
+
+    let(:interactor) do
+      build_action do
+        def self.on_exception(exception, context:); end
+
+        expects :should_fail_with, allow_blank: true, default: false
+
+        def call
+          noncritical do
+            fail_with "allow intentional failure to bubble" if should_fail_with
+            raise "Some internal issue!"
+          end
+        end
+      end
+    end
+
+    it "calls on_exception but doesn't fail interactor" do
+      expect(interactor).to receive(:on_exception).once
+      is_expected.to be_success
+    end
+
+    context "with an explicit fail_with" do
+      subject { interactor.call(should_fail_with: true) }
+
+      it "allows the failure to bubble up" do
+        expect(interactor).not_to receive(:on_exception)
+        is_expected.not_to be_success
+        expect(subject.error).to eq("allow intentional failure to bubble")
+      end
+    end
+  end
 end

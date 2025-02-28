@@ -254,7 +254,7 @@ module ServiceAction
         end.join(", ")
       end
 
-      def allowed_fields = @facade.allowed_fields
+      def allowed_fields = @facade.send(:allowed_fields)
 
       def format_for_inspect(field, value)
         return value.inspect if value.nil?
@@ -274,7 +274,7 @@ module ServiceAction
         inspection_filter.filter_param(field, inspected_value)
       end
 
-      def inspection_filter = @interactor.inspection_filter
+      def inspection_filter = @interactor.send(:inspection_filter)
     end
 
     class ContextFacade
@@ -293,6 +293,8 @@ module ServiceAction
           singleton_class.define_method(field) { @context.public_send(field) }
         end
       end
+
+      attr_reader :allowed_fields
 
       def inspect
         ContextFacadeInspector.new(interactor: @interactor, facade: self, context: @context, direction: @direction).call
