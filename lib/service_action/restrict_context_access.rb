@@ -324,6 +324,12 @@ module ServiceAction
 
       private
 
+      def reset_failure!
+        @context.delete_field(:error)
+        @context.delete_field(:exception)
+        @context.instance_variable_set("@failure", false)
+      end
+
       def exposure_method_name = @direction == :inbound ? :expects : :exposes
 
       INTERNALLY_USED_METHODS = %i[called! rollback! each_pair].freeze

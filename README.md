@@ -31,6 +31,9 @@ Just spinning this up -- not yet released (i.e. doc updates to come later).
 * feature: `noncritical do` - within this block, any exceptions will be logged (on_exception handler), but will NOT fail the interactor
     edge case: `fail_with` _will_ still fail the parent interactor
 * logging - all entrance/exit logged by default at debug level. can set logger level, or define class method targeted_for_debug_logging? = true, or set the env var... (Ability to toggle on debug logging for any specific actor without going through CI run.)
+* Organizer
+    Each in layer accepts and exposes own accessor set, but internal instance vars passed down chain (actor C can accept something A exposed that B didn’t touch). BUT organizer must expose it’s own layer (effectively documenting public vs private for future refactor — Interactor failed here)
+
 
 
 ---
