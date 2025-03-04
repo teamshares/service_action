@@ -8,17 +8,24 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Examples', link: '/markdown-examples' }
+      { text: 'User Guide', link: '/guide' }
     ],
 
     sidebar: [
       {
-        text: 'Examples',
+        text: 'Introduction',
         items: [
-          { text: 'Markdown Examples', link: '/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/api-examples' }
+          { text: 'About', link: '/about/' },
+          { text: 'User Guide', link: '/guide/' },
+          { text: 'Getting Started', link: '/getting-started/' },
         ]
-      }
+      },
+      {
+        text: 'Advanced Usage',
+        items: [
+          { text: 'Validating User Input', link: '/advanced/validating-user-input' },
+        ]
+      },
     ],
 
     socialLinks: [
