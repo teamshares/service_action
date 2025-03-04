@@ -59,11 +59,22 @@ module ServiceAction
       end
 
       def should_skip_step?(config)
-        return false unless config[:if] || config[:unless]
+        # TODO: support unless as well
+        return false unless config.key?(:if)
 
-        # TODO: implement this
-        # config[:if].call(@context)
-        false
+        checker = case config[:if]
+                  in Symbol then -> { send(config[:if]) }
+                  in Proc then config[:if]
+                  else -> { true }
+                  end
+
+        begin
+          !checker.call
+        rescue StandardError => e
+          # TODO: check if this branch gets called as expected
+          log("Error evaluating if condition: #{e}")
+          true
+        end
       end
 
       def convert_to_action(given)

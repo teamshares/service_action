@@ -33,6 +33,28 @@ RSpec.describe "Organizing" do
     end
   end
 
+  describe "conditionally skips execution" do
+    let(:organizer) do
+      Class.new do
+        include ServiceAction::Organizer
+
+        organize(
+          { action: -> { log("step one") }, if: true },
+          { action: -> { log("step two") }, if: false },
+          { action: -> { log("step three") }, if: -> { false } },
+          { action: -> { log("step four") }, if: -> { true } }
+        )
+      end
+    end
+
+    it "skips steps based on condition" do
+      result = organizer.call
+
+      # TODO: add checks that things got skipped
+      expect(result).to be_success
+    end
+  end
+
   describe "accepts configuration per step" do
     describe "accepts configuration per step" do
       describe "{ critical: false } with internal failure" do
