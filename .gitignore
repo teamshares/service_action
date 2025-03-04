@@ -9,3 +9,9 @@
 
 # rspec failure tracking
 .rspec_status
+
+# vitepress
+docs/.vitepress/dist
+docs/.vitepress/cache
+node_modules
+yarn-error.log
