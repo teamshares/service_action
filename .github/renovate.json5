@@ -1,0 +1,16 @@
+
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["github>teamshares/renovate-config:lib.json5"],
+  ignoreDeps: [
+  ],
+  "packageRules": [
+    { // Automatically group minor-level updates (for packages w/ version larger than 0) when CI passes
+      matchUpdateTypes: ["minor"],
+      matchCurrentVersion: "!/^0/",
+      groupName: "all minor-level dependencies",
+      groupSlug: "all-minors",
+      automerge: false
+    },
+  ],
+}
