@@ -1,12 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe ServiceAction do
-  def build_action(&block)
-    action = Class.new.send(:include, ServiceAction)
-    action.class_eval(&block) if block
-    action
-  end
-
   describe "#on_exception" do
     subject { interactor.call(name: "Foo", ssn: "abc", extra: "bang", outbound: 1) }
 

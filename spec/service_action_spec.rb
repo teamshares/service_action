@@ -5,12 +5,6 @@ RSpec.describe ServiceAction do
     expect(ServiceAction::VERSION).not_to be nil
   end
 
-  def build_action(&block)
-    action = Class.new.send(:include, ServiceAction)
-    action.class_eval(&block) if block
-    action
-  end
-
   describe "inbound validation" do
     let(:action) do
       build_action do

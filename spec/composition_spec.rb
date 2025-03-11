@@ -17,12 +17,6 @@ RSpec.describe "Composition" do
     end
   end
 
-  def build_action(&block)
-    action = Class.new.send(:include, ServiceAction)
-    action.class_eval(&block) if block
-    action
-  end
-
   let(:action) do
     build_action do
       expects :name, type: String

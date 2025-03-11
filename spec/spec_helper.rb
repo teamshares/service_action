@@ -14,3 +14,9 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 end
+
+def build_action(&block)
+  action = Class.new.send(:include, ServiceAction)
+  action.class_eval(&block) if block
+  action
+end
