@@ -3,11 +3,12 @@
 Just spinning this up -- not yet released (i.e. doc updates to come later).
 
 ## Notes
-* Define `metrics_hook` on base class to enable metrics tracking
-    update: define `metrics_hook_wrapper` (better naming) to enable additional tracking (get debug start/stop by default)
-    set up configuration to log at info level for all:
+set up configuration to log at info level for all:
+
     ServiceAction.configure do |c|
       c.global_debug_logging = false
+      c.on_exception = ...
+      c.metrics_wrapper = ...
     end
 
 * document `error_message` (default/global + per-exception type)

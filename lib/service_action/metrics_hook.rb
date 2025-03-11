@@ -27,9 +27,9 @@ module ServiceAction
       private
 
       def _metrics_wrapper(&block)
-        return yield unless respond_to?(:metrics_hook_wrapper)
+        return yield unless ServiceAction.config.metrics_hook
 
-        metrics_hook_wrapper(&block)
+        ServiceAction.config.metrics_hook.call(self.class.name || "AnonymousClass", &block)
       end
 
       def _log_before
