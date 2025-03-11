@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ServiceAction
+module Action
   module MetricsHook
     def self.included(base)
       base.class_eval do
@@ -27,9 +27,9 @@ module ServiceAction
       private
 
       def _metrics_wrapper(&block)
-        return yield unless ServiceAction.config.metrics_hook
+        return yield unless Action.config.metrics_hook
 
-        ServiceAction.config.metrics_hook.call(self.class.name || "AnonymousClass", &block)
+        Action.config.metrics_hook.call(self.class.name || "AnonymousClass", &block)
       end
 
       def _log_before
@@ -54,7 +54,7 @@ module ServiceAction
         "success"
       rescue StandardError => e
         [
-          e.is_a?(ServiceAction::Failure) ? "expected_failure" : "exception",
+          e.is_a?(Action::Failure) ? "expected_failure" : "exception",
           e
         ]
       end

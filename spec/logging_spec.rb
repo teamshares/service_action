@@ -1,6 +1,6 @@
 RSpec.describe "Logging" do
   def build_interactor(&block)
-    interactor = Class.new.send(:include, ServiceAction)
+    interactor = Class.new.send(:include, Action)
     interactor.class_eval(&block) if block
     interactor
   end
@@ -27,7 +27,7 @@ RSpec.describe "Logging" do
     is_expected.to be_success
   end
 
-  ServiceAction::Logging::LEVELS.each do |level|
+  Action::Logging::LEVELS.each do |level|
     describe "##{level}" do
       let(:level) { level }
 

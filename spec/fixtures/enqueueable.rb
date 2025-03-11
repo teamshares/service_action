@@ -3,7 +3,7 @@
 # These classes are only used to test Enqueueable
 
 class TestEnqueueableInteractor
-  include ServiceAction
+  include Action
   queue_options retry: 10, retry_queue: "low"
 
   expects :name, :address
@@ -15,7 +15,7 @@ class TestEnqueueableInteractor
 end
 
 class AnotherEnqueueableInteractor
-  include ServiceAction
+  include Action
   queue_options retry: 10, retry_queue: "low"
 
   expects :foo
@@ -26,7 +26,7 @@ class AnotherEnqueueableInteractor
 end
 
 class TestEnqueueableOrganizer
-  include ServiceAction::Organizer
+  include Action::Organizer
 
   queue_options queue: "high", retry: 2, retry_queue: "medium"
   organize TestEnqueueableInteractor, AnotherEnqueueableInteractor

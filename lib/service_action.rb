@@ -1,22 +1,23 @@
 # frozen_string_literal: true
 
+module ServiceAction; end
 require_relative "service_action/version"
 
 require "interactor"
 
 require "active_support"
 
-require_relative "service_action/configuration"
-require_relative "service_action/metrics_hook"
-require_relative "service_action/logging"
-require_relative "service_action/restrict_context_access"
-require_relative "service_action/swallow_exceptions"
-require_relative "service_action/depends_on"
+require_relative "action/configuration"
+require_relative "action/metrics_hook"
+require_relative "action/logging"
+require_relative "action/restrict_context_access"
+require_relative "action/swallow_exceptions"
+require_relative "action/depends_on"
 
-require_relative "service_action/organizer"
-require_relative "service_action/enqueueable"
+require_relative "action/organizer"
+require_relative "action/enqueueable"
 
-module ServiceAction
+module Action
   def self.included(base)
     base.class_eval do
       include Interactor
@@ -36,7 +37,7 @@ module ServiceAction
       include Enqueueable
 
       # Allow additional automatic includes to be configured
-      Array(ServiceAction.config.additional_includes).each { |mod| include mod }
+      Array(Action.config.additional_includes).each { |mod| include mod }
     end
   end
 end

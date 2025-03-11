@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe ServiceAction do
+RSpec.describe Action do
   it "has a version number" do
     expect(ServiceAction::VERSION).not_to be nil
   end
@@ -24,7 +24,7 @@ RSpec.describe ServiceAction do
       it "fails" do
         expect(subject).to be_failure
         expect(subject.error).to eq("Something went wrong")
-        expect(subject.exception).to be_a(ServiceAction::InboundContractViolation)
+        expect(subject.exception).to be_a(Action::InboundContractViolation)
         expect(subject.exception.errors).to be_a(ActiveModel::Errors)
         expect(subject.exception.message).to eq("Foo must be greater than 10")
       end
@@ -60,7 +60,7 @@ RSpec.describe ServiceAction do
       it {
         expect do
           subject.foo
-        end.to raise_error(ServiceAction::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
+        end.to raise_error(Action::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
       }
     end
 
@@ -70,7 +70,7 @@ RSpec.describe ServiceAction do
       it "fails" do
         expect(subject).to be_failure
         expect(subject.error).to eq("Something went wrong")
-        expect(subject.exception).to be_a(ServiceAction::OutboundContractViolation)
+        expect(subject.exception).to be_a(Action::OutboundContractViolation)
         expect(subject.exception.errors).to be_a(ActiveModel::Errors)
         expect(subject.exception.message).to eq("Bar must be greater than 10")
       end
@@ -92,7 +92,7 @@ RSpec.describe ServiceAction do
       it "fails" do
         expect(subject).to be_failure
         expect(subject.error).to eq("Something went wrong")
-        expect(subject.exception).to be_a(ServiceAction::InvalidExposureAttempt)
+        expect(subject.exception).to be_a(Action::InvalidExposureAttempt)
       end
     end
   end
@@ -117,7 +117,7 @@ RSpec.describe ServiceAction do
       it "fails" do
         expect(subject).to be_failure
         expect(subject.error).to eq("Something went wrong")
-        expect(subject.exception).to be_a(ServiceAction::InboundContractViolation)
+        expect(subject.exception).to be_a(Action::InboundContractViolation)
         expect(subject.exception.errors).to be_a(ActiveModel::Errors)
         expect(subject.exception.message).to eq("Foo is not a String")
       end
@@ -184,7 +184,7 @@ RSpec.describe ServiceAction do
     it "is not ok" do
       is_expected.not_to be_success
       expect(subject.error).to eq("Something went wrong")
-      expect(subject.exception).to be_a(ServiceAction::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
+      expect(subject.exception).to be_a(Action::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
       expect(subject.exception.message).to eq "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
     end
   end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ServiceAction
+module Action
   module Enqueueable
     def self.included(base)
       base.class_eval do
@@ -43,7 +43,8 @@ module ServiceAction
 
           params_to_global_id(context).tap do |args|
             if client.send(:json_unsafe?, args).present?
-              raise ArgumentError, "Cannot pass non-JSON-serializable objects to Sidekiq. Make sure all objects in the context are serializable (or respond to to_global_id)."
+              raise ArgumentError,
+                    "Cannot pass non-JSON-serializable objects to Sidekiq. Make sure all objects in the context are serializable (or respond to to_global_id)."
             end
           end
         end

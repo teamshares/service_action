@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require "service_action/restrict_context_access"
-require "service_action/swallow_exceptions"
+require "action/restrict_context_access"
+require "action/swallow_exceptions"
 
 RSpec.describe "Inspect" do
   def build_interactor(&block)
     interactor = Class.new.send(:include, Interactor)
-    interactor = interactor.send(:include, ServiceAction::RestrictContextAccess)
-    interactor.include(ServiceAction::SwallowExceptions)
+    interactor = interactor.send(:include, Action::RestrictContextAccess)
+    interactor.include(Action::SwallowExceptions)
     interactor.class_eval(&block) if block
     interactor
   end
@@ -46,7 +46,7 @@ RSpec.describe "Inspect" do
       let(:foo) { 9 }
 
       it {
-        is_expected.to eq "#<OutboundContextFacade [failed with ServiceAction::InboundContractViolation: 'Foo must be greater than 10'] bar: nil, phone: nil, the_inbound_context: nil>"
+        is_expected.to eq "#<OutboundContextFacade [failed with Action::InboundContractViolation: 'Foo must be greater than 10'] bar: nil, phone: nil, the_inbound_context: nil>"
       }
     end
 

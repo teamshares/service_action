@@ -8,7 +8,7 @@ RSpec.describe "Composition" do
   module Wrapper
     def self.included(base)
       base.class_eval do
-        include ServiceAction
+        include Action
         expects :wrapper_thing
         before do
           log "before from wrapper"

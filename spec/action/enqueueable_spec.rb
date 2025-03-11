@@ -3,7 +3,7 @@
 require "sidekiq/testing"
 require_relative "../fixtures/enqueueable"
 
-RSpec.describe ServiceAction::Enqueueable, type: :worker do
+RSpec.describe Action::Enqueueable, type: :worker do
   context "Interactor" do
     subject { TestEnqueueableInteractor.enqueue(this: "this", that: "that") }
 

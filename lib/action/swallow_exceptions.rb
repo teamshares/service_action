@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ServiceAction
+module Action
   class Failure < StandardError
     attr_reader :context
 
@@ -20,7 +20,7 @@ module ServiceAction
 
         def run_with_exception_swallowing!
           original_run!
-        rescue ServiceAction::Failure => e
+        rescue Action::Failure => e
           # Just re-raise these (so we don't hit the unexpected-error case below)
           raise e
         rescue StandardError => e
@@ -38,13 +38,13 @@ module ServiceAction
         # Tweaked to check @context.object_id rather than context (since forwarding object_id causes Ruby to complain)
         def run
           run!
-        rescue ServiceAction::Failure => e
+        rescue Action::Failure => e
           raise if @context.object_id != e.context.object_id
         end
 
         def trigger_on_exception(e)
-          ServiceAction.config.on_exception(e,
-                                            context: respond_to?(:context_for_logging) ? context_for_logging : @context.to_h)
+          Action.config.on_exception(e,
+                                     context: respond_to?(:context_for_logging) ? context_for_logging : @context.to_h)
         rescue StandardError => e
           # No action needed -- downstream #on_exception implementation should ideally log any internal failures, but
           # we don't want exception *handling* failures to cascade and overwrite the original exception.
@@ -54,7 +54,7 @@ module ServiceAction
         class << base
           def call_bang_with_unswallowed_exceptions(context = {})
             original_call!(context)
-          rescue ServiceAction::Failure => e
+          rescue Action::Failure => e
             # De-swallow the exception, if we caught any
             raise e.context.exception if e.context.exception
 
@@ -138,12 +138,12 @@ module ServiceAction
         @context.error = message
         @context.instance_variable_set("@failure", true)
 
-        raise ServiceAction::Failure.new(message, @context)
+        raise Action::Failure.new(message, @context)
       end
 
       def noncritical
         yield
-      rescue ServiceAction::Failure => e
+      rescue Action::Failure => e
         # NOTE: reraising so we can still fail_with from inside the block
         raise e
       rescue StandardError => e

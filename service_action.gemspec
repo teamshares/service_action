@@ -32,12 +32,12 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   # Core dependencies
-  spec.add_dependency "activemodel", "> 7.0"    # For contract validation
+  spec.add_dependency "activemodel", "> 7.0" # For contract validation
   spec.add_dependency "activesupport", "> 7.0" # For compact_blank and friends
-  spec.add_dependency "interactor", "3.1.2"     # Organize business logic into interactors
+  spec.add_dependency "interactor", "3.1.2" # Organize business logic into interactors
 
   # Dev depedencies
   spec.add_development_dependency "pry-byebug", "3.10.1"
   spec.add_development_dependency "rspec", "~> 3.2"
-  spec.add_development_dependency "sidekiq", "~> 7.3.9"  # Background job processor -- when update, ensure `process_context_to_sidekiq_args` is still compatible
+  spec.add_development_dependency "sidekiq", "~> 7.3.9" # Background job processor -- when update, ensure `process_context_to_sidekiq_args` is still compatible
 end

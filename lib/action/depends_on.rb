@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ServiceAction
+module Action
   module DependsOn
     def self.included(base)
       base.class_eval do

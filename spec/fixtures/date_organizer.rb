@@ -3,7 +3,7 @@
 # These classes are only used to test organizers (`let`-ed anonymous classes don't play well with organizing)
 
 class DateParser
-  include ServiceAction
+  include Action
 
   expects :date, type: String
   exposes :date, type: Date
@@ -16,7 +16,7 @@ class DateParser
 end
 
 class DateEvaluator
-  include ServiceAction
+  include Action
 
   expects :date, type: Date
   exposes :year, type: Integer
@@ -33,7 +33,7 @@ class VanillaOrganizer
 end
 
 class ServiceActionOrganizer
-  include ServiceAction::Organizer
+  include Action::Organizer
 
   expects :date, type: String
   exposes :year, type: Integer

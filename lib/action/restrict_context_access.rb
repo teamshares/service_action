@@ -4,7 +4,7 @@ require "active_model"
 require "active_support/core_ext/enumerable"
 require "active_support/core_ext/module/delegation"
 
-module ServiceAction
+module Action
   class ContractViolationException < StandardError
     attr_reader :errors
 

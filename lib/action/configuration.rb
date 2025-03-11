@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ServiceAction
+module Action
   class Configuration
     attr_accessor :global_debug_logging, :on_exception, :metrics_hook, :additional_includes
 

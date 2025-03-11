@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe ServiceAction do
+RSpec.describe Action do
   describe "#on_exception" do
     subject { interactor.call(name: "Foo", ssn: "abc", extra: "bang", outbound: 1) }
 

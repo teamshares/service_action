@@ -3,7 +3,6 @@
 require_relative "fixtures/date_organizer"
 
 RSpec.describe "Organizing" do
-
   describe "standalone parsing" do
     subject { DateParser.call(date:) }
 
@@ -60,7 +59,7 @@ RSpec.describe "Organizing" do
     context "with non-string date" do
       let(:date) { Date.parse("2020-01-01") }
 
-      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Date is not a String") }
+      it { expect { subject }.to raise_error(Action::InboundContractViolation, "Date is not a String") }
     end
 
     context "with invalid date string" do

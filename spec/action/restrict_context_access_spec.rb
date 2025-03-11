@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require "service_action/restrict_context_access"
+require "action/restrict_context_access"
 
 RSpec.describe "Validations" do
   def build_interactor(&block)
     interactor = Class.new.send(:include, Interactor)
-    interactor = interactor.send(:include, ServiceAction::RestrictContextAccess)
+    interactor = interactor.send(:include, Action::RestrictContextAccess)
     interactor.class_eval(&block) if block
     interactor
   end
@@ -26,7 +26,7 @@ RSpec.describe "Validations" do
 
     it "creates accessor" do
       is_expected.to be_success
-      is_expected.to be_a(ServiceAction::RestrictContextAccess::ContextFacade)
+      is_expected.to be_a(Action::RestrictContextAccess::ContextFacade)
 
       # Defined on context and allowed by outbound facade
       expect(subject.bar).to eq 12
@@ -34,12 +34,12 @@ RSpec.describe "Validations" do
       # Defined on context, but only allowed on inbound facade
       expect do
         subject.foo
-      end.to raise_error(ServiceAction::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
+      end.to raise_error(Action::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
 
       # Defined on context, but blocked by facade
       expect do
         subject.baz
-      end.to raise_error(ServiceAction::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
+      end.to raise_error(Action::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
 
       # Not defined at all on context
       expect { subject.quz }.to raise_error(NoMethodError)
@@ -73,7 +73,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo: 9, bar: 12, baz: 13) }
 
     it "fails inbound" do
-      expect { subject }.to raise_error(ServiceAction::InboundContractViolation)
+      expect { subject }.to raise_error(Action::InboundContractViolation)
     end
   end
 
@@ -81,7 +81,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(bar: 12, baz: 13) }
 
     it "fails inbound" do
-      expect { subject }.to raise_error(ServiceAction::InboundContractViolation)
+      expect { subject }.to raise_error(Action::InboundContractViolation)
     end
   end
 
@@ -89,7 +89,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo: 11, baz: 13) }
 
     it "fails" do
-      expect { subject }.to raise_error(ServiceAction::OutboundContractViolation)
+      expect { subject }.to raise_error(Action::OutboundContractViolation)
     end
   end
 
@@ -175,13 +175,13 @@ RSpec.describe "Validations" do
       it {
         expect do
           subject
-        end.to raise_error(ServiceAction::InboundContractViolation, "Foo is not one of String, Numeric")
+        end.to raise_error(Action::InboundContractViolation, "Foo is not one of String, Numeric")
       }
     end
 
     context "when false" do
       let(:foo) { false }
-      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Foo can't be blank") }
+      it { expect { subject }.to raise_error(Action::InboundContractViolation, "Foo can't be blank") }
     end
   end
 
@@ -201,7 +201,7 @@ RSpec.describe "Validations" do
 
     context "when false" do
       let(:foo) { nil }
-      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Foo must be true or false") }
+      it { expect { subject }.to raise_error(Action::InboundContractViolation, "Foo must be true or false") }
     end
   end
 
@@ -219,7 +219,7 @@ RSpec.describe "Validations" do
 
     context "when one invalid" do
       let(:bar) { "string" }
-      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Bar should numberz") }
+      it { expect { subject }.to raise_error(Action::InboundContractViolation, "Bar should numberz") }
     end
 
     context "when set" do
@@ -279,7 +279,7 @@ RSpec.describe "Validations" do
       let(:input) { "" }
 
       it "raises" do
-        expect { subject }.to raise_error(ServiceAction::PreprocessingError)
+        expect { subject }.to raise_error(Action::PreprocessingError)
       end
     end
   end
@@ -300,7 +300,7 @@ RSpec.describe "Validations" do
 
     context "when invalid" do
       let(:foo) { 10 }
-      it { expect { subject }.to raise_error(ServiceAction::InboundContractViolation, "Foo must be pretty big") }
+      it { expect { subject }.to raise_error(Action::InboundContractViolation, "Foo must be pretty big") }
     end
   end
 end

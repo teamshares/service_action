@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require "service_action/swallow_exceptions"
+require "action/swallow_exceptions"
 
 RSpec.describe "Swallowing exceptions" do
   def build_interactor(&block)
     interactor = Class.new.send(:include, Interactor)
-    interactor = interactor.send(:include, ServiceAction::SwallowExceptions)
+    interactor = interactor.send(:include, Action::SwallowExceptions)
     interactor.class_eval(&block) if block
     interactor
   end

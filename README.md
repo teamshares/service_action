@@ -5,7 +5,7 @@ Just spinning this up -- not yet released (i.e. doc updates to come later).
 ## Notes
 set up configuration to log at info level for all:
 
-    ServiceAction.configure do |c|
+    Action.configure do |c|
       c.global_debug_logging = false
       c.on_exception = ...
       c.metrics_wrapper = ...
@@ -15,7 +15,7 @@ set up configuration to log at info level for all:
 * Note we have two custom validations: boolean: true and the implicit type: foo.  (maybe with array of types?)
     Note a third allows custom validations: `expects :foo, validate: ->(value) { "must be pretty big" unless value > 10 }` (error raised if any string returned OR if it raises an exception)
 * call! -- will raise any exceptions OR an Interactor::Failure (todo: namespace with our new gem?) if user-facing error occurred (otherwise non-bang will never raise)
-    * note call! still logs completion even if failure (in TS::ServiceAction)
+    * note call! still logs completion even if failure (from configuration's on_exception)
 * enqueue vs enqueue!
     * enqueue will not retry even if fails
     * enqueue! will go through normal sidekiq retries on any failure (including user-facing `fail_with`)
