@@ -32,6 +32,10 @@ Just spinning this up -- not yet released (i.e. doc updates to come later).
     edge case: `fail_with` _will_ still fail the parent interactor
 * logging - all entrance/exit logged by default at debug level. can set logger level, or define class method targeted_for_debug_logging? = true, or set the env var... (Ability to toggle on debug logging for any specific actor without going through CI run.)
 
+---
+
+Composition: see composition_spec.rb -- note if you add e.g. an expects, it'll get ADDED to those from the base layer
+Inheritance: work in progress
 
 ---
 
