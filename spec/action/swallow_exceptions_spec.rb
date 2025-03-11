@@ -3,18 +3,11 @@
 require "action/swallow_exceptions"
 
 RSpec.describe "Swallowing exceptions" do
-  def build_interactor(&block)
-    interactor = Class.new.send(:include, Interactor)
-    interactor = interactor.send(:include, Action::SwallowExceptions)
-    interactor.class_eval(&block) if block
-    interactor
-  end
-
   describe "return shape" do
     subject(:result) { interactor.call }
 
     context "when successful" do
-      let(:interactor) { build_interactor {} }
+      let(:interactor) { build_interactor(Action::SwallowExceptions) {} }
 
       it "is ok" do
         is_expected.to be_success
@@ -23,7 +16,7 @@ RSpec.describe "Swallowing exceptions" do
 
     context "when fail_with (user facing error)" do
       let(:interactor) do
-        build_interactor do
+        build_interactor(Action::SwallowExceptions) do
           def call
             fail_with("User-facing error")
           end
@@ -39,7 +32,7 @@ RSpec.describe "Swallowing exceptions" do
 
     context "when exception raised" do
       let(:interactor) do
-        build_interactor do
+        build_interactor(Action::SwallowExceptions) do
           def call
             raise "Some internal issue!"
           end
@@ -65,7 +58,7 @@ RSpec.describe "Swallowing exceptions" do
 
         context "with per-exception-type overrides as string" do
           let(:interactor) do
-            build_interactor do
+            build_interactor(Action::SwallowExceptions) do
               error_message RuntimeError: "RUNTIME ERROR"
 
               def call
@@ -81,7 +74,7 @@ RSpec.describe "Swallowing exceptions" do
 
         context "with per-exception-type overrides as callable" do
           let(:interactor) do
-            build_interactor do
+            build_interactor(Action::SwallowExceptions) do
               error_message RuntimeError => ->(e) { "RUNTIME: #{e.message}" }
 
               def call

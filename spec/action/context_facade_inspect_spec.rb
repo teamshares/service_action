@@ -4,16 +4,8 @@ require "action/restrict_context_access"
 require "action/swallow_exceptions"
 
 RSpec.describe "Inspect" do
-  def build_interactor(&block)
-    interactor = Class.new.send(:include, Interactor)
-    interactor = interactor.send(:include, Action::RestrictContextAccess)
-    interactor.include(Action::SwallowExceptions)
-    interactor.class_eval(&block) if block
-    interactor
-  end
-
   let(:interactor) do
-    build_interactor do
+    build_interactor(Action::RestrictContextAccess, Action::SwallowExceptions) do
       expects :foo, type: Numeric, numericality: { greater_than: 10 }
       expects :ssn, sensitive: true
 

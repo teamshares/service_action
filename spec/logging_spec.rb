@@ -1,12 +1,6 @@
 RSpec.describe "Logging" do
-  def build_interactor(&block)
-    interactor = Class.new.send(:include, Action)
-    interactor.class_eval(&block) if block
-    interactor
-  end
-
-  let(:interactor) do
-    build_interactor do
+  let(:action) do
+    build_action do
       expects :level, default: :info
       def call
         log("Hello, World!", level:)
@@ -16,10 +10,10 @@ RSpec.describe "Logging" do
   let(:level) { :info }
   let(:logger) { instance_double(Logger, debug: nil, info: nil, error: nil, warn: nil, fatal: nil) }
 
-  subject { interactor.call(level:) }
+  subject { action.call(level:) }
 
   before do
-    allow(interactor).to receive(:logger).and_return(logger)
+    allow(action).to receive(:logger).and_return(logger)
   end
 
   it "logs" do
@@ -42,7 +36,7 @@ RSpec.describe "Logging" do
     let(:level) { :debug }
 
     before do
-      allow(interactor).to receive(:targeted_for_debug_logging?).and_return(targeted_for_debug_logging)
+      allow(action).to receive(:targeted_for_debug_logging?).and_return(targeted_for_debug_logging)
     end
 
     context "false" do

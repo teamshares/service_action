@@ -1,13 +1,6 @@
 RSpec.describe "Logging" do
-  def build_interactor(&block)
-    interactor = Class.new.send(:include, Interactor)
-    interactor = interactor.send(:include, Action::Logging)
-    interactor.class_eval(&block) if block
-    interactor
-  end
-
   let(:interactor) do
-    build_interactor do
+    build_interactor(Action::Logging) do
       def call
         log("Hello, World!")
       end

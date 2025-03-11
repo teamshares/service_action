@@ -20,3 +20,10 @@ def build_action(&block)
   action.class_eval(&block) if block
   action
 end
+
+def build_interactor(*modules, &block)
+  interactor = Class.new.send(:include, Interactor)
+  modules.each { |mod| interactor = interactor.send(:include, mod) }
+  interactor.class_eval(&block) if block
+  interactor
+end

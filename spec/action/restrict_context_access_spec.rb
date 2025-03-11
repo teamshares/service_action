@@ -3,15 +3,8 @@
 require "action/restrict_context_access"
 
 RSpec.describe "Validations" do
-  def build_interactor(&block)
-    interactor = Class.new.send(:include, Interactor)
-    interactor = interactor.send(:include, Action::RestrictContextAccess)
-    interactor.class_eval(&block) if block
-    interactor
-  end
-
   let(:interactor) do
-    build_interactor do
+    build_interactor(Action::RestrictContextAccess) do
       expects :foo, type: Numeric, numericality: { greater_than: 10 }
       exposes :bar
 
@@ -56,7 +49,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo: 11).the_inbound_context.inspect }
 
     let(:interactor) do
-      build_interactor do
+      build_interactor(Action::RestrictContextAccess) do
         expects :foo, type: Numeric, numericality: { greater_than: 10 }
         exposes :the_inbound_context
 
@@ -97,7 +90,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo: nil, bar: nil, baz: 13) }
 
     let(:interactor) do
-      build_interactor do
+      build_interactor(Action::RestrictContextAccess) do
         expects :foo, type: Numeric, allow_blank: true
         exposes :bar, allow_blank: true
       end
@@ -110,7 +103,7 @@ RSpec.describe "Validations" do
     subject { interactor.call }
 
     let(:interactor) do
-      build_interactor do
+      build_interactor(Action::RestrictContextAccess) do
         expects :foo, type: Numeric, default: 99
         exposes :foo
       end
@@ -126,7 +119,7 @@ RSpec.describe "Validations" do
     subject { interactor.call }
 
     let(:interactor) do
-      build_interactor do
+      build_interactor(Action::RestrictContextAccess) do
         exposes :foo, default: 99
       end
     end
@@ -141,7 +134,7 @@ RSpec.describe "Validations" do
     subject { interactor.call }
 
     let(:interactor) do
-      build_interactor do
+      build_interactor(Action::RestrictContextAccess) do
         exposes :qux
 
         def call
@@ -160,7 +153,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo:) }
 
     let(:interactor) do
-      build_interactor do
+      build_interactor(Action::RestrictContextAccess) do
         expects :foo, type: [String, Numeric]
       end
     end
@@ -189,7 +182,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo:) }
 
     let(:interactor) do
-      build_interactor do
+      build_interactor(Action::RestrictContextAccess) do
         expects :foo, boolean: true
       end
     end
@@ -212,7 +205,7 @@ RSpec.describe "Validations" do
     let(:bar) { 2 }
 
     let(:interactor) do
-      build_interactor do
+      build_interactor(Action::RestrictContextAccess) do
         expects :foo, :bar, type: { with: Numeric, message: "should numberz" }
       end
     end
@@ -231,7 +224,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo:) }
 
     let(:interactor) do
-      build_interactor do
+      build_interactor(Action::RestrictContextAccess) do
         expects :foo, boolean: true
         exposes :bar, allow_blank: true
 
@@ -256,7 +249,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(date_as_date: input) }
 
     let(:interactor) do
-      build_interactor do
+      build_interactor(Action::RestrictContextAccess) do
         expects :date_as_date, type: Date, preprocess: ->(raw) { Date.parse(raw) }
         exposes :date_as_date
 
@@ -288,7 +281,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo:) }
 
     let(:interactor) do
-      build_interactor do
+      build_interactor(Action::RestrictContextAccess) do
         expects :foo, validate: ->(value) { "must be pretty big" unless value > 10 }
       end
     end
