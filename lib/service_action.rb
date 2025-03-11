@@ -34,6 +34,9 @@ module ServiceAction
       include DependsOn
 
       include Enqueueable
+
+      # Allow additional automatic includes to be configured
+      Array(ServiceAction.config.additional_includes).each { |mod| include mod }
     end
   end
 end

@@ -2,7 +2,7 @@
 
 module ServiceAction
   class Configuration
-    attr_accessor :global_debug_logging, :on_exception, :metrics_hook
+    attr_accessor :global_debug_logging, :on_exception, :metrics_hook, :additional_includes
 
     def global_debug_logging? = global_debug_logging
 
