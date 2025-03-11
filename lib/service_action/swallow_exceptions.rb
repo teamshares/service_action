@@ -1,14 +1,17 @@
 # frozen_string_literal: true
 
-module Interactor
-  class Failure < StandardError
-    def message
-      context.error || "Execution was intentionally stopped"
-    end
-  end
-end
-
 module ServiceAction
+  class Failure < StandardError
+    attr_reader :context
+
+    def initialize(message, context = nil)
+      super(message)
+      @context = context
+    end
+
+    def message = super.presence || "Execution was intentionally stopped"
+  end
+
   module SwallowExceptions
     def self.included(base)
       base.class_eval do
@@ -17,7 +20,7 @@ module ServiceAction
 
         def run_with_exception_swallowing!
           original_run!
-        rescue Interactor::Failure => e
+        rescue ServiceAction::Failure => e
           # Just re-raise these (so we don't hit the unexpected-error case below)
           raise e
         rescue StandardError => e
@@ -35,7 +38,7 @@ module ServiceAction
         # Tweaked to check @context.object_id rather than context (since forwarding object_id causes Ruby to complain)
         def run
           run!
-        rescue Interactor::Failure => e
+        rescue ServiceAction::Failure => e
           raise if @context.object_id != e.context.object_id
         end
 
@@ -51,11 +54,11 @@ module ServiceAction
         class << base
           def call_bang_with_unswallowed_exceptions(context = {})
             original_call!(context)
-          rescue Interactor::Failure => e
-            # De-swallow the exception, if we caught any failures
+          rescue ServiceAction::Failure => e
+            # De-swallow the exception, if we caught any
             raise e.context.exception if e.context.exception
 
-            # Otherwise just raise the Interactor::Failure
+            # Otherwise just raise the Failure
             raise
           end
 
@@ -132,12 +135,15 @@ module ServiceAction
 
       def fail_with(message)
         # TODO: implement this centrally
-        @context.fail!(error: message)
+        @context.error = message
+        @context.instance_variable_set("@failure", true)
+
+        raise ServiceAction::Failure.new(message, @context)
       end
 
       def noncritical
         yield
-      rescue Interactor::Failure => e
+      rescue ServiceAction::Failure => e
         # NOTE: reraising so we can still fail_with from inside the block
         raise e
       rescue StandardError => e

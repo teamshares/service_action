@@ -235,8 +235,8 @@ RSpec.describe ServiceAction do
         expect(result.error).to eq("User-facing error")
       end
 
-      it "raises interactor failure" do
-        expect { action.call! }.to raise_error(Interactor::Failure, "User-facing error")
+      it "raises our own Failure class" do
+        expect { action.call! }.to raise_error(described_class::Failure, "User-facing error")
       end
     end
   end

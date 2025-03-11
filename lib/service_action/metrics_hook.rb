@@ -54,7 +54,7 @@ module ServiceAction
         "success"
       rescue StandardError => e
         [
-          e.is_a?(Interactor::Failure) ? "expected_failure" : "exception",
+          e.is_a?(ServiceAction::Failure) ? "expected_failure" : "exception",
           e
         ]
       end
