@@ -136,13 +136,19 @@ module ServiceAction
 
       def apply_inbound_defaults!
         self.class.instance_variable_get("@inbound_defaults").each do |field, default_value|
-          @context.public_send("#{field}=", default_value) unless @context.public_send(field)
+          unless @context.public_send(field)
+            @context.public_send("#{field}=",
+                                 default_value.respond_to?(:call) ? default_value.call : default_value)
+          end
         end
       end
 
       def apply_outbound_defaults!
         self.class.instance_variable_get("@outbound_defaults").each do |field, default_value|
-          @context.public_send("#{field}=", default_value) unless @context.public_send(field)
+          unless @context.public_send(field)
+            @context.public_send("#{field}=",
+                                 default_value.respond_to?(:call) ? default_value.call : default_value)
+          end
         end
       end
 
