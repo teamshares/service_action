@@ -57,7 +57,7 @@ RSpec.describe "Swallowing exceptions" do
       context "with custom generic error message" do
         subject { result.error }
 
-        before { interactor.define_singleton_method(:generic_error_message) { "Custom error message" } }
+        before { interactor.error_message("Custom error message") }
 
         it "uses the generic override" do
           is_expected.to eq("Custom error message")
@@ -66,7 +66,7 @@ RSpec.describe "Swallowing exceptions" do
         context "with per-exception-type overrides as string" do
           let(:interactor) do
             build_interactor do
-              error_for RuntimeError: "RUNTIME ERROR"
+              error_message RuntimeError: "RUNTIME ERROR"
 
               def call
                 raise "Some internal issue!"
@@ -82,7 +82,7 @@ RSpec.describe "Swallowing exceptions" do
         context "with per-exception-type overrides as callable" do
           let(:interactor) do
             build_interactor do
-              error_for RuntimeError => ->(e) { "RUNTIME: #{e.message}" }
+              error_message RuntimeError => ->(e) { "RUNTIME: #{e.message}" }
 
               def call
                 raise "Some internal issue!"

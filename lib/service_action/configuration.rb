@@ -2,9 +2,11 @@
 
 module ServiceAction
   class Configuration
-    attr_accessor :global_debug_logging
+    attr_accessor :global_debug_logging, :on_exception
 
     def global_debug_logging? = global_debug_logging
+
+    def on_exception(e, context: {}) = @on_exception&.call(e, context:) # rubocop:disable Lint/DuplicateMethods
   end
 
   class << self

@@ -4,12 +4,12 @@ RSpec.describe ServiceAction do
   describe "#on_exception" do
     subject { interactor.call(name: "Foo", ssn: "abc", extra: "bang", outbound: 1) }
 
+    before do
+      allow(described_class.config).to receive(:on_exception)
+    end
+
     let(:interactor) do
       build_action do
-        def self.on_exception(exception, context:)
-          # We could log the exception here -- context is pre-filtered
-        end
-
         expects :name
         expects :ssn, sensitive: true
         exposes :outbound
@@ -25,7 +25,8 @@ RSpec.describe ServiceAction do
     end
 
     it "is given a filtered context (sensitive values filtered + only declared inbound/outbound fields)" do
-      expect(interactor).to receive(:on_exception).with(anything, context: filtered_context).and_call_original
+      expect(described_class.config).to receive(:on_exception).with(anything,
+                                                                    context: filtered_context).and_call_original
       is_expected.not_to be_success
     end
   end
@@ -49,7 +50,7 @@ RSpec.describe ServiceAction do
     end
 
     it "calls on_exception but doesn't fail interactor" do
-      expect(interactor).to receive(:on_exception).once
+      expect(described_class.config).to receive(:on_exception).once
       is_expected.to be_success
     end
 

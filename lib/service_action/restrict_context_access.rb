@@ -319,6 +319,15 @@ module ServiceAction
       delegate :success?, :failure?, :error, :exception, to: :@context
       def ok? = success?
 
+      def success
+        return unless success?
+
+        @interactor.class.instance_variable_get("@success_message").presence || GENERIC_SUCCESS_MESSAGE
+      end
+      GENERIC_SUCCESS_MESSAGE = "Action completed successfully"
+
+      def message = error || success
+
       def fail!(...) = raise ContextMethodNotAllowed,
                              "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
 
