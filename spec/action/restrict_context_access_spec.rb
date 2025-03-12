@@ -282,6 +282,8 @@ RSpec.describe "Validations" do
   describe "with custom validations" do
     subject { interactor.call(foo:) }
 
+    let(:foo) { 20 }
+
     let(:interactor) do
       build_interactor(Action::RestrictContextAccess) do
         expects :foo, validate: ->(value) { "must be pretty big" unless value > 10 }
@@ -289,13 +291,48 @@ RSpec.describe "Validations" do
     end
 
     context "when valid" do
-      let(:foo) { 20 }
       it { is_expected.to be_success }
     end
 
     context "when invalid" do
       let(:foo) { 10 }
       it { expect { subject }.to raise_error(Action::Contract::Violation::InboundValidation, "Foo must be pretty big") }
+    end
+
+    context "when validator raises" do
+      let(:interactor) do
+        build_interactor(Action::RestrictContextAccess) do
+          expects :foo, validate: ->(_value) { raise "oops" }
+        end
+      end
+
+      it {
+        expect do
+          subject
+        end.to raise_error(Action::Contract::Violation::InboundValidation, "Foo failed validation: oops")
+      }
+    end
+  end
+
+  describe "accepts multiple fields per expects line" do
+    subject { interactor.call(foo:, bar:) }
+
+    let(:interactor) do
+      build_interactor(Action::RestrictContextAccess) do
+        expects :foo, :bar, type: Numeric
+      end
+    end
+
+    context "when valid" do
+      let(:foo) { 1 }
+      let(:bar) { 2 }
+      it { is_expected.to be_success }
+    end
+
+    context "when invalid" do
+      let(:foo) { 1 }
+      let(:bar) { "string" }
+      it { expect { subject }.to raise_error(Action::Contract::Violation::InboundValidation, "Bar is not a Numeric") }
     end
   end
 end

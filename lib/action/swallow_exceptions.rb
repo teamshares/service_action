@@ -123,7 +123,6 @@ module Action
       private
 
       def fail_with(message)
-        # TODO: implement this centrally
         @context.error = message
         @context.instance_variable_set("@failure", true)
 

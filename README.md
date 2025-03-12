@@ -14,7 +14,7 @@ set up configuration to log at info level for all:
 * document `error_message` (default/global + per-exception type)
 * Note we have two custom validations: boolean: true and the implicit type: foo.  (maybe with array of types?)
     Note a third allows custom validations: `expects :foo, validate: ->(value) { "must be pretty big" unless value > 10 }` (error raised if any string returned OR if it raises an exception)
-* call! -- will raise any exceptions OR an Interactor::Failure (todo: namespace with our new gem?) if user-facing error occurred (otherwise non-bang will never raise)
+* call! -- will raise any exceptions OR our own Action::Failure if user-facing error occurred (otherwise non-bang will never raise)
     * note call! still logs completion even if failure (from configuration's on_exception)
 * enqueue vs enqueue!
     * enqueue will not retry even if fails

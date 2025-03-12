@@ -41,6 +41,8 @@ module Action
         def message
           errors.full_messages.to_sentence
         end
+
+        def to_s = message
       end
 
       class InboundValidation < ValidationBase; end
