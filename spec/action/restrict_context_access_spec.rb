@@ -86,12 +86,12 @@ RSpec.describe "Validations" do
     end
   end
 
-  context "allow_blank" do
-    subject { interactor.call(foo: nil, bar: nil, baz: 13) }
+  context "allow_blank is passed to further validators as well" do
+    subject { interactor.call(baz: 13) }
 
     let(:interactor) do
       build_interactor(Action::RestrictContextAccess) do
-        expects :foo, type: Numeric, allow_blank: true
+        expects :foo, type: Numeric, numericality: { greater_than: 10 }, allow_blank: true
         exposes :bar, allow_blank: true
       end
     end
@@ -192,9 +192,11 @@ RSpec.describe "Validations" do
       it { is_expected.to be_success }
     end
 
-    context "when false" do
+    context "when nil" do
       let(:foo) { nil }
-      it { expect { subject }.to raise_error(Action::InboundContractViolation, "Foo must be true or false") }
+      it {
+        expect { subject }.to raise_error(Action::InboundContractViolation, "Foo must be true or false")
+      }
     end
   end
 

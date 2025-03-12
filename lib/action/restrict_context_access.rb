@@ -61,9 +61,15 @@ module Action
           @inbound_preprocessing[field] = preprocess if preprocess.present?
           @sensitive_fields << field if sensitive
 
-          # If we're using the boolean validator, we need to allow blank to let false get through
-          allow_blank = true if additional_validations.has_key?(:boolean)
-          @inbound_validations[field][:presence] = true unless allow_blank
+          if allow_blank
+            additional_validations.transform_values! do |v|
+              v = v.is_a?(Hash) ? v : { value: v }
+              { allow_blank: true }.merge(v)
+            end
+          else
+            # TODO: do we need to merge allow_blank into all _other_ validations' options?
+            @inbound_validations[field][:presence] = !additional_validations.key?(:boolean)
+          end
 
           # TODO: do we need to merge allow_blank into all subsequent validations' options?
           @inbound_validations[field].merge!(additional_validations) if additional_validations.present?
@@ -82,11 +88,17 @@ module Action
           @outbound_accessors << field
           @sensitive_fields << field if sensitive
 
-          # If we're using the boolean validator, we need to allow blank to let false get through
-          allow_blank = true if additional_validations.has_key?(:boolean)
-          @outbound_validations[field][:presence] = true unless allow_blank
-          @outbound_validations[field].merge!(additional_validations) if additional_validations.present?
+          if allow_blank
+            additional_validations.transform_values! do |v|
+              v = v.is_a?(Hash) ? v : { value: v }
+              { allow_blank: true }.merge(v)
+            end
+          else
+            # TODO: do we need to merge allow_blank into all _other_ validations' options?
+            @outbound_validations[field][:presence] = !additional_validations.key?(:boolean)
+          end
 
+          @outbound_validations[field].merge!(additional_validations) if additional_validations.present?
           @outbound_defaults[field] = default if default.present?
 
           field
