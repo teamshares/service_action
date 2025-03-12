@@ -8,6 +8,7 @@ require "interactor"
 require "active_support"
 
 require_relative "action/configuration"
+require_relative "action/exceptions"
 require_relative "action/metrics_hook"
 require_relative "action/logging"
 require_relative "action/restrict_context_access"

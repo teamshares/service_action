@@ -66,7 +66,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo: 9, bar: 12, baz: 13) }
 
     it "fails inbound" do
-      expect { subject }.to raise_error(Action::InboundContractViolation)
+      expect { subject }.to raise_error(Action::Contract::InboundViolation)
     end
   end
 
@@ -74,7 +74,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(bar: 12, baz: 13) }
 
     it "fails inbound" do
-      expect { subject }.to raise_error(Action::InboundContractViolation)
+      expect { subject }.to raise_error(Action::Contract::InboundViolation)
     end
   end
 
@@ -82,7 +82,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo: 11, baz: 13) }
 
     it "fails" do
-      expect { subject }.to raise_error(Action::OutboundContractViolation)
+      expect { subject }.to raise_error(Action::Contract::OutboundViolation)
     end
   end
 
@@ -168,13 +168,13 @@ RSpec.describe "Validations" do
       it {
         expect do
           subject
-        end.to raise_error(Action::InboundContractViolation, "Foo is not one of String, Numeric")
+        end.to raise_error(Action::Contract::InboundViolation, "Foo is not one of String, Numeric")
       }
     end
 
     context "when false" do
       let(:foo) { false }
-      it { expect { subject }.to raise_error(Action::InboundContractViolation, "Foo can't be blank") }
+      it { expect { subject }.to raise_error(Action::Contract::InboundViolation, "Foo can't be blank") }
     end
   end
 
@@ -195,7 +195,7 @@ RSpec.describe "Validations" do
     context "when nil" do
       let(:foo) { nil }
       it {
-        expect { subject }.to raise_error(Action::InboundContractViolation, "Foo must be true or false")
+        expect { subject }.to raise_error(Action::Contract::InboundViolation, "Foo must be true or false")
       }
     end
   end
@@ -214,7 +214,7 @@ RSpec.describe "Validations" do
 
     context "when one invalid" do
       let(:bar) { "string" }
-      it { expect { subject }.to raise_error(Action::InboundContractViolation, "Bar should numberz") }
+      it { expect { subject }.to raise_error(Action::Contract::InboundViolation, "Bar should numberz") }
     end
 
     context "when set" do
@@ -295,7 +295,7 @@ RSpec.describe "Validations" do
 
     context "when invalid" do
       let(:foo) { 10 }
-      it { expect { subject }.to raise_error(Action::InboundContractViolation, "Foo must be pretty big") }
+      it { expect { subject }.to raise_error(Action::Contract::InboundViolation, "Foo must be pretty big") }
     end
   end
 end

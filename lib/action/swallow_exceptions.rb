@@ -1,17 +1,6 @@
 # frozen_string_literal: true
 
 module Action
-  class Failure < StandardError
-    attr_reader :context
-
-    def initialize(message, context = nil)
-      super(message)
-      @context = context
-    end
-
-    def message = super.presence || "Execution was intentionally stopped"
-  end
-
   module SwallowExceptions
     def self.included(base)
       base.class_eval do
@@ -138,6 +127,7 @@ module Action
         @context.error = message
         @context.instance_variable_set("@failure", true)
 
+        # TODO: should we use context_for_logging here? But doublecheck the one place where we're checking object_id on it...
         raise Action::Failure.new(message, @context)
       end
 

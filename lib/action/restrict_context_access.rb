@@ -5,24 +5,6 @@ require "active_support/core_ext/enumerable"
 require "active_support/core_ext/module/delegation"
 
 module Action
-  class ContractViolationException < StandardError
-    attr_reader :errors
-
-    def initialize(errors)
-      @errors = errors
-      super
-    end
-
-    def message
-      errors.full_messages.to_sentence
-    end
-  end
-
-  class InboundContractViolation < ContractViolationException; end
-  class OutboundContractViolation < ContractViolationException; end
-  class InvalidExposureAttempt < StandardError; end
-  class PreprocessingError < StandardError; end
-
   module RestrictContextAccess
     def self.included(base)
       base.class_eval do
@@ -126,12 +108,9 @@ module Action
         end
 
         kwargs.each do |key, value|
-          if outbound_context.respond_to?(key)
-            @context.public_send("#{key}=", value)
-          else
-            raise InvalidExposureAttempt,
-                  "Attempted to expose unknown key '#{key}': be sure to declare it with `exposes :#{key}`"
-          end
+          raise Action::Contract::InvalidExposure, key unless outbound_context.respond_to?(key)
+
+          @context.public_send("#{key}=", value)
         end
       end
     end
@@ -182,7 +161,7 @@ module Action
 
         return if validator.valid?
 
-        exception_klass = direction == :inbound ? InboundContractViolation : OutboundContractViolation
+        exception_klass = direction == :inbound ? Action::Contract::InboundViolation : Action::Contract::OutboundViolation
         raise exception_klass, validator.errors
       end
 

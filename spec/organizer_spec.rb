@@ -59,7 +59,7 @@ RSpec.describe "Organizing" do
     context "with non-string date" do
       let(:date) { Date.parse("2020-01-01") }
 
-      it { expect { subject }.to raise_error(Action::InboundContractViolation, "Date is not a String") }
+      it { expect { subject }.to raise_error(Action::Contract::InboundViolation, "Date is not a String") }
     end
 
     context "with invalid date string" do
