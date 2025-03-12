@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require "action/restrict_context_access"
+require "action/contract"
 
-RSpec.describe Action::RestrictContextAccess do
+RSpec.describe Action::Contract do
   let(:interactor) do
     build_interactor(described_class) do
       expects :foo, type: Numeric, numericality: { greater_than: 10 }

@@ -8,7 +8,7 @@ require "action/contract_validator"
 require "action/context_facade"
 
 module Action
-  module RestrictContextAccess
+  module Contract
     def self.included(base)
       base.class_eval do
         @inbound_preprocessing ||= {}
