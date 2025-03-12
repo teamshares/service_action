@@ -60,7 +60,7 @@ RSpec.describe Action do
       it {
         expect do
           subject.foo
-        end.to raise_error(Action::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
+        end.to raise_error(Action::ContextFacade::MethodNotAllowed)
       }
     end
 
@@ -184,7 +184,7 @@ RSpec.describe Action do
     it "is not ok" do
       is_expected.not_to be_success
       expect(subject.error).to eq("Something went wrong")
-      expect(subject.exception).to be_a(Action::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
+      expect(subject.exception).to be_a(Action::ContextFacade::MethodNotAllowed)
       expect(subject.exception.message).to eq "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
     end
   end

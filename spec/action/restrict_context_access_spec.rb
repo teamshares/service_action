@@ -19,7 +19,7 @@ RSpec.describe "Validations" do
 
     it "creates accessor" do
       is_expected.to be_success
-      is_expected.to be_a(Action::RestrictContextAccess::ContextFacade)
+      is_expected.to be_a(Action::ContextFacade)
 
       # Defined on context and allowed by outbound facade
       expect(subject.bar).to eq 12
@@ -27,12 +27,12 @@ RSpec.describe "Validations" do
       # Defined on context, but only allowed on inbound facade
       expect do
         subject.foo
-      end.to raise_error(Action::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
+      end.to raise_error(Action::ContextFacade::MethodNotAllowed)
 
       # Defined on context, but blocked by facade
       expect do
         subject.baz
-      end.to raise_error(Action::RestrictContextAccess::ContextFacade::ContextMethodNotAllowed)
+      end.to raise_error(Action::ContextFacade::MethodNotAllowed)
 
       # Not defined at all on context
       expect { subject.quz }.to raise_error(NoMethodError)
