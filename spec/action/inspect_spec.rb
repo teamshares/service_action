@@ -1,11 +1,8 @@
 # frozen_string_literal: true
 
-require "action/restrict_context_access"
-require "action/swallow_exceptions"
-
-RSpec.describe "Inspect" do
-  let(:interactor) do
-    build_interactor(Action::RestrictContextAccess, Action::SwallowExceptions) do
+RSpec.describe Action do
+  let(:action) do
+    build_action do
       expects :foo, type: Numeric, numericality: { greater_than: 10 }
       expects :ssn, sensitive: true
 
@@ -23,9 +20,15 @@ RSpec.describe "Inspect" do
   end
 
   let(:foo) { 11 }
-  let(:result) { interactor.call(foo:, ssn: "abc") }
+  let(:result) { action.call(foo:, ssn: "abc") }
 
-  context "outbound facade" do
+  context "inbound facade #inspect" do
+    subject { result.the_inbound_context.inspect }
+
+    it { is_expected.to eq "#<InboundContextFacade foo: 11, ssn: [FILTERED]>" }
+  end
+
+  context "outbound facade #inspect" do
     subject { result.inspect }
 
     context "when OK" do
@@ -49,11 +52,5 @@ RSpec.describe "Inspect" do
         is_expected.to eq "#<OutboundContextFacade [failed with 'intentional error'] bar: 130, phone: [FILTERED], the_inbound_context: [FILTERED]>"
       }
     end
-  end
-
-  context "inbound facade" do
-    subject { result.the_inbound_context.inspect }
-
-    it { is_expected.to eq "#<InboundContextFacade foo: 11, ssn: [FILTERED]>" }
   end
 end

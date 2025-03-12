@@ -2,13 +2,13 @@
 
 RSpec.describe Action do
   describe "#on_exception" do
-    subject { interactor.call(name: "Foo", ssn: "abc", extra: "bang", outbound: 1) }
+    subject { action.call(name: "Foo", ssn: "abc", extra: "bang", outbound: 1) }
 
     before do
       allow(described_class.config).to receive(:on_exception)
     end
 
-    let(:interactor) do
+    let(:action) do
       build_action do
         expects :name
         expects :ssn, sensitive: true
@@ -32,9 +32,9 @@ RSpec.describe Action do
   end
 
   describe "#noncritical" do
-    subject { interactor.call }
+    subject { action.call }
 
-    let(:interactor) do
+    let(:action) do
       build_action do
         def self.on_exception(exception, context:); end
 
@@ -49,16 +49,16 @@ RSpec.describe Action do
       end
     end
 
-    it "calls on_exception but doesn't fail interactor" do
+    it "calls on_exception but doesn't fail action" do
       expect(described_class.config).to receive(:on_exception).once
       is_expected.to be_success
     end
 
     context "with an explicit fail_with" do
-      subject { interactor.call(should_fail_with: true) }
+      subject { action.call(should_fail_with: true) }
 
       it "allows the failure to bubble up" do
-        expect(interactor).not_to receive(:on_exception)
+        expect(action).not_to receive(:on_exception)
         is_expected.not_to be_success
         expect(subject.error).to eq("allow intentional failure to bubble")
       end

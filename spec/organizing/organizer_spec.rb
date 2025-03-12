@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "fixtures/date_organizer"
+require_relative "../fixtures/date_organizer"
 
 RSpec.describe "Organizing" do
   describe "standalone parsing" do

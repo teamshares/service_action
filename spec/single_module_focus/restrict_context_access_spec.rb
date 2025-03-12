@@ -2,9 +2,9 @@
 
 require "action/restrict_context_access"
 
-RSpec.describe "Validations" do
+RSpec.describe Action::RestrictContextAccess do
   let(:interactor) do
-    build_interactor(Action::RestrictContextAccess) do
+    build_interactor(described_class) do
       expects :foo, type: Numeric, numericality: { greater_than: 10 }
       exposes :bar
 
@@ -49,7 +49,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo: 11).the_inbound_context.inspect }
 
     let(:interactor) do
-      build_interactor(Action::RestrictContextAccess) do
+      build_interactor(described_class) do
         expects :foo, type: Numeric, numericality: { greater_than: 10 }
         exposes :the_inbound_context
 
@@ -90,7 +90,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(baz: 13) }
 
     let(:interactor) do
-      build_interactor(Action::RestrictContextAccess) do
+      build_interactor(described_class) do
         expects :foo, type: Numeric, numericality: { greater_than: 10 }, allow_blank: true
         exposes :bar, allow_blank: true
       end
@@ -103,7 +103,7 @@ RSpec.describe "Validations" do
     subject { interactor.call }
 
     let(:interactor) do
-      build_interactor(Action::RestrictContextAccess) do
+      build_interactor(described_class) do
         expects :foo, type: Numeric, default: 99
         exposes :foo
       end
@@ -119,7 +119,7 @@ RSpec.describe "Validations" do
     subject { interactor.call }
 
     let(:interactor) do
-      build_interactor(Action::RestrictContextAccess) do
+      build_interactor(described_class) do
         exposes :foo, default: 99
       end
     end
@@ -134,7 +134,7 @@ RSpec.describe "Validations" do
     subject { interactor.call }
 
     let(:interactor) do
-      build_interactor(Action::RestrictContextAccess) do
+      build_interactor(described_class) do
         exposes :qux
 
         def call
@@ -153,7 +153,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo:) }
 
     let(:interactor) do
-      build_interactor(Action::RestrictContextAccess) do
+      build_interactor(described_class) do
         expects :foo, type: [String, Numeric]
       end
     end
@@ -182,7 +182,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo:) }
 
     let(:interactor) do
-      build_interactor(Action::RestrictContextAccess) do
+      build_interactor(described_class) do
         expects :foo, boolean: true
       end
     end
@@ -207,7 +207,7 @@ RSpec.describe "Validations" do
     let(:bar) { 2 }
 
     let(:interactor) do
-      build_interactor(Action::RestrictContextAccess) do
+      build_interactor(described_class) do
         expects :foo, :bar, type: { with: Numeric, message: "should numberz" }
       end
     end
@@ -226,7 +226,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo:) }
 
     let(:interactor) do
-      build_interactor(Action::RestrictContextAccess) do
+      build_interactor(described_class) do
         expects :foo, boolean: true
         exposes :bar, allow_blank: true
 
@@ -251,7 +251,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(date_as_date: input) }
 
     let(:interactor) do
-      build_interactor(Action::RestrictContextAccess) do
+      build_interactor(described_class) do
         expects :date_as_date, type: Date, preprocess: ->(raw) { Date.parse(raw) }
         exposes :date_as_date
 
@@ -285,7 +285,7 @@ RSpec.describe "Validations" do
     let(:foo) { 20 }
 
     let(:interactor) do
-      build_interactor(Action::RestrictContextAccess) do
+      build_interactor(described_class) do
         expects :foo, validate: ->(value) { "must be pretty big" unless value > 10 }
       end
     end
@@ -301,7 +301,7 @@ RSpec.describe "Validations" do
 
     context "when validator raises" do
       let(:interactor) do
-        build_interactor(Action::RestrictContextAccess) do
+        build_interactor(described_class) do
           expects :foo, validate: ->(_value) { raise "oops" }
         end
       end
@@ -318,7 +318,7 @@ RSpec.describe "Validations" do
     subject { interactor.call(foo:, bar:) }
 
     let(:interactor) do
-      build_interactor(Action::RestrictContextAccess) do
+      build_interactor(described_class) do
         expects :foo, :bar, type: Numeric
       end
     end
