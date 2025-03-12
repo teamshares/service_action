@@ -44,7 +44,7 @@ RSpec.describe Action do
     end
 
     context "success" do
-      subject { action.call(foo: 10, bar: 11, baz: 1) }
+      subject(:result) { action.call(foo: 10, bar: 11, baz: 1) }
 
       it { is_expected.to be_success }
 
@@ -56,12 +56,9 @@ RSpec.describe Action do
         expect(subject.qux).to eq(99)
       end
 
-      # TODO: should this be swallowed and just be_failure with an exception attached?
-      it {
-        expect do
-          subject.foo
-        end.to raise_error(Action::ContextFacade::MethodNotAllowed)
-      }
+      it "prevents external access of non-exposed values" do
+        expect { result.foo }.to raise_error(Action::ContextFacade::MethodNotAllowed)
+      end
     end
 
     context "contract failure" do
