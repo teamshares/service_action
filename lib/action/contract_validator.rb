@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Action
   class ContractValidator
     include ActiveModel::Validations

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Action::Logging do
   let(:interactor) do
     build_interactor(described_class) do

@@ -1,5 +1,7 @@
 AllCops:
   TargetRubyVersion: 3.1
+  SuggestExtensions: false
+  NewCops: enable
 
 Style/StringLiterals:
   Enabled: true
@@ -9,8 +11,32 @@ Style/StringLiteralsInInterpolation:
   Enabled: true
   EnforcedStyle: double_quotes
 
-Layout/LineLength:
-  Max: 120
-
 Style/Documentation:
   Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 60
+
+Metrics/PerceivedComplexity:
+  Max: 15
+
+Metrics/AbcSize:
+  Max: 51
+
+Metrics/CyclomaticComplexity:
+  Max: 12
+
+Lint/EmptyBlock:
+  Enabled: false
+
+Naming/MethodParameterName:
+  AllowedNames: e
+
+Metrics/ParameterLists:
+  Max: 6
+
+Layout/LineLength:
+  Max: 160

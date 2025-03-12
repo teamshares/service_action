@@ -48,7 +48,7 @@ module Action
 
           if allow_blank
             additional_validations.transform_values! do |v|
-              v = v.is_a?(Hash) ? v : { value: v }
+              v = { value: v } unless v.is_a?(Hash)
               { allow_blank: true }.merge(v)
             end
           else
@@ -75,7 +75,7 @@ module Action
 
           if allow_blank
             additional_validations.transform_values! do |v|
-              v = v.is_a?(Hash) ? v : { value: v }
+              v = { value: v } unless v.is_a?(Hash)
               { allow_blank: true }.merge(v)
             end
           else

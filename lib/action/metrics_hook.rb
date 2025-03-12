@@ -26,10 +26,10 @@ module Action
 
       private
 
-      def _metrics_wrapper(&block)
+      def _metrics_wrapper(&)
         return yield unless Action.config.metrics_hook
 
-        Action.config.metrics_hook.call(self.class.name || "AnonymousClass", &block)
+        Action.config.metrics_hook.call(self.class.name || "AnonymousClass", &)
       end
 
       def _log_before

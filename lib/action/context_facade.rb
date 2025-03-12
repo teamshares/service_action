@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "active_support/parameter_filter"
 
 module Action
@@ -30,8 +32,10 @@ module Action
 
     def message = error || success
 
-    def fail!(...) = raise Action::ContextFacade::MethodNotAllowed,
-                           "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
+    def fail!(...)
+      raise Action::ContextFacade::MethodNotAllowed,
+            "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
+    end
 
     private
 
@@ -42,7 +46,7 @@ module Action
     INTERNALLY_USED_METHODS = %i[called! rollback! each_pair].freeze
 
     # Add nice error message for missing methods
-    def method_missing(method_name, *args, &block)
+    def method_missing(method_name, ...)
       if context.respond_to?(method_name)
         # Ideally Interactor base module would use @context rather than the context accessor
         # (since in our version, we want to disallow implementing services to directly access context).
@@ -50,9 +54,7 @@ module Action
         # To avoid rewriting the methods directly to change to use @context, we redefine #context to
         # return the #outbound_context.  That's great for external access, but in the outbound context case
         # we need to allow the internal control methods to pass through.
-        if direction == :outbound && INTERNALLY_USED_METHODS.include?(method_name)
-          return context.send(method_name, *args, &block)
-        end
+        return context.send(method_name, ...) if direction == :outbound && INTERNALLY_USED_METHODS.include?(method_name)
 
         msg = <<~MSG
           Method ##{method_name} is not available on the #{@direction} context facade!
@@ -122,7 +124,7 @@ module Action
                           "#{value[0, 50]}...".inspect
                         elsif value.is_a?(Date) || value.is_a?(Time)
                           %("#{value.to_fs(:inspect)}")
-                        elsif value.class.name == "ActiveRecord::Relation"
+                        elsif defined?(::ActiveRecord::Relation) && value.instance_of?(::ActiveRecord::Relation)
                           # Avoid hydrating full AR relation (i.e. avoid loading records just to report an error)
                           "#{value.name}::ActiveRecord_Relation"
                         else

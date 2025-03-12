@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Action do
   context "calling fail! on context" do
     subject { action.call }

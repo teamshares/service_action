@@ -6,13 +6,15 @@ require_relative "../fixtures/date_organizer"
 
 RSpec.describe "One-off confirmation" do
   describe "Composition" do
-    module Wrapper
-      def self.included(base)
-        base.class_eval do
-          include Action
-          expects :wrapper_thing
-          before do
-            log "before from wrapper"
+    let(:wrapper) do
+      Module.new do
+        def self.included(base)
+          base.class_eval do
+            include Action
+            expects :wrapper_thing
+            before do
+              log "before from wrapper"
+            end
           end
         end
       end
@@ -40,7 +42,7 @@ RSpec.describe "One-off confirmation" do
 
     context "via wrapper" do
       def build_wrapper_action(&block)
-        action = Class.new.send(:include, Wrapper)
+        action = Class.new.send(:include, wrapper)
         action.class_eval(&block) if block
         action
       end

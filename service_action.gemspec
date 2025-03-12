@@ -11,9 +11,10 @@ Gem::Specification.new do |spec|
   spec.summary = "Pattern for writing callable service objects"
   spec.description = "Contract validation and error swallowing wrappers around Interactor"
   spec.homepage = "https://github.com/teamshares/service-action"
-  spec.required_ruby_version = ">= 3.0.0"
+  spec.required_ruby_version = ">= 3.1.0"
 
   spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
+  spec.metadata["rubygems_mfa_required"] = "true"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
@@ -35,9 +36,4 @@ Gem::Specification.new do |spec|
   spec.add_dependency "activemodel", "> 7.0" # For contract validation
   spec.add_dependency "activesupport", "> 7.0" # For compact_blank and friends
   spec.add_dependency "interactor", "3.1.2" # Organize business logic into interactors
-
-  # Dev depedencies
-  spec.add_development_dependency "pry-byebug", "3.10.1"
-  spec.add_development_dependency "rspec", "~> 3.2"
-  spec.add_development_dependency "sidekiq", "~> 7.3.9" # Background job processor -- when update, ensure `process_context_to_sidekiq_args` is still compatible
 end

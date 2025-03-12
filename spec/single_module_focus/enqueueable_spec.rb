@@ -76,7 +76,7 @@ RSpec.describe Action::Enqueueable, type: :worker do
         expect do
           subject
         end.to raise_error(ArgumentError,
-                           "Cannot pass non-JSON-serializable objects to Sidekiq. Make sure all objects in the context are serializable (or respond to to_global_id).")
+                           "Cannot pass non-JSON-serializable objects to Sidekiq. Make sure all objects in the context are serializable (or respond to to_global_id).") # rubocop:disable Layout/LineLength
       end
     end
   end

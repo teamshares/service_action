@@ -7,7 +7,7 @@ RSpec.describe "One-off confirmation" do
     describe "default accepts proc" do
       let(:action) do
         build_action do
-          expects :channel, default: -> { VALID_CHANNELS.first }
+          expects :channel, default: -> { valid_channels.first }
 
           def call
             log "Got channel: #{channel}"
@@ -15,7 +15,7 @@ RSpec.describe "One-off confirmation" do
 
           private
 
-          VALID_CHANNELS = %w[web email sms].freeze
+          def self.valid_channels = %w[web email sms].freeze
         end
       end
 
@@ -67,9 +67,6 @@ RSpec.describe "One-off confirmation" do
             def call
               log "Got channel: #{channel}"
             end
-
-            private
-
           end
         end
 
