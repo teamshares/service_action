@@ -128,23 +128,8 @@ module Action
         end
       end
 
-      def apply_inbound_defaults!
-        self.class.instance_variable_get("@inbound_defaults").each do |field, default_value|
-          unless @context.public_send(field)
-            @context.public_send("#{field}=",
-                                 default_value.respond_to?(:call) ? default_value.call : default_value)
-          end
-        end
-      end
-
-      def apply_outbound_defaults!
-        self.class.instance_variable_get("@outbound_defaults").each do |field, default_value|
-          unless @context.public_send(field)
-            @context.public_send("#{field}=",
-                                 default_value.respond_to?(:call) ? default_value.call : default_value)
-          end
-        end
-      end
+      def apply_inbound_defaults! = apply_defaults! self.class.instance_variable_get("@inbound_defaults")
+      def apply_outbound_defaults! = apply_defaults! self.class.instance_variable_get("@outbound_defaults")
 
       def validate_contract!(direction)
         raise ArgumentError, "Invalid direction: #{direction}" unless %i[inbound outbound].include?(direction)
@@ -174,6 +159,17 @@ module Action
 
       def sensitive_fields
         self.class.instance_variable_get("@sensitive_fields").compact
+      end
+
+      private
+
+      def apply_defaults!(defaults_mapping)
+        defaults_mapping.each do |field, default_value|
+          unless @context.public_send(field)
+            @context.public_send("#{field}=",
+                                 default_value.respond_to?(:call) ? default_value.call : default_value)
+          end
+        end
       end
     end
   end
