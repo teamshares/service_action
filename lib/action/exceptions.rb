@@ -13,34 +13,38 @@ module Action
     def message = super.presence || "Execution was intentionally stopped"
   end
 
-  class PreprocessingError < StandardError; end
+  class ContextFacade
+    class MethodNotAllowed < NoMethodError; end
+  end
 
   module Contract
-    class Violation < StandardError; end
+    class Violation < StandardError
+      class PreprocessingError < Violation; end
 
-    class InvalidExposure < Violation
-      def initialize(key)
-        @key = key
-        super()
+      class InvalidExposure < Violation
+        def initialize(key)
+          @key = key
+          super()
+        end
+
+        def message = "Attempted to expose unknown key '#{@key}': be sure to declare it with `exposes :#{@key}`"
       end
 
-      def message = "Attempted to expose unknown key '#{@key}': be sure to declare it with `exposes :#{@key}`"
+      class ValidationBase < Violation
+        attr_reader :errors
+
+        def initialize(errors)
+          @errors = errors
+          super
+        end
+
+        def message
+          errors.full_messages.to_sentence
+        end
+      end
+
+      class InboundValidation < ValidationBase; end
+      class OutboundValidation < ValidationBase; end
     end
-
-    class ValidationViolation < Violation
-      attr_reader :errors
-
-      def initialize(errors)
-        @errors = errors
-        super
-      end
-
-      def message
-        errors.full_messages.to_sentence
-      end
-    end
-
-    class InboundViolation < ValidationViolation; end
-    class OutboundViolation < ValidationViolation; end
   end
 end

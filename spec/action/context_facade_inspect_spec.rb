@@ -38,7 +38,7 @@ RSpec.describe "Inspect" do
       let(:foo) { 9 }
 
       it {
-        is_expected.to eq "#<OutboundContextFacade [failed with Action::Contract::InboundViolation: 'Foo must be greater than 10'] bar: nil, phone: nil, the_inbound_context: nil>"
+        is_expected.to eq "#<OutboundContextFacade [failed with Action::Contract::Violation::InboundValidation: 'Foo must be greater than 10'] bar: nil, phone: nil, the_inbound_context: nil>"
       }
     end
 

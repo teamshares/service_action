@@ -2,8 +2,6 @@ require "active_support/parameter_filter"
 
 module Action
   class ContextFacade
-    class MethodNotAllowed < NoMethodError; end
-
     def initialize(interactor, direction, context)
       @context = context
       @direction = direction
@@ -32,7 +30,7 @@ module Action
 
     def message = error || success
 
-    def fail!(...) = raise MethodNotAllowed,
+    def fail!(...) = raise Action::ContextFacade::MethodNotAllowed,
                            "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
 
     private
@@ -63,7 +61,7 @@ module Action
             #{exposure_method_name} :#{method_name}
         MSG
 
-        raise MethodNotAllowed, msg
+        raise Action::ContextFacade::MethodNotAllowed, msg
       end
 
       super
