@@ -9,7 +9,7 @@ require "active_support"
 
 require_relative "action/configuration"
 require_relative "action/exceptions"
-require_relative "action/metrics_hook"
+require_relative "action/top_level_around_hook"
 require_relative "action/logging"
 require_relative "action/contract"
 require_relative "action/swallow_exceptions"
@@ -28,7 +28,7 @@ module Action
 
       # NOTE: include before any others that set hooks (like contract validation), so we
       # can include those hook executions in any traces set from this hook.
-      include MetricsHook
+      include TopLevelAroundHook
 
       include Contract
       include SwallowExceptions

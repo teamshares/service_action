@@ -2,7 +2,7 @@
 
 module Action
   class Configuration
-    attr_accessor :global_debug_logging, :on_exception, :metrics_hook, :additional_includes
+    attr_accessor :global_debug_logging, :on_exception, :top_level_around_hook, :additional_includes
 
     def global_debug_logging? = global_debug_logging
 

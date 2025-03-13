@@ -36,8 +36,6 @@ RSpec.describe Action do
 
     let(:action) do
       build_action do
-        def self.on_exception(exception, context:); end
-
         expects :should_fail_with, allow_blank: true, default: false
 
         def call
@@ -58,7 +56,7 @@ RSpec.describe Action do
       subject { action.call(should_fail_with: true) }
 
       it "allows the failure to bubble up" do
-        expect(action).not_to receive(:on_exception)
+        expect(described_class.config).not_to receive(:on_exception)
         is_expected.not_to be_success
         expect(subject.error).to eq("allow intentional failure to bubble")
       end

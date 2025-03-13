@@ -1,21 +1,21 @@
 # frozen_string_literal: true
 
 module Action
-  module MetricsHook
+  module TopLevelAroundHook
     def self.included(base)
       base.class_eval do
-        around :metrics_hook
+        around :__top_level_around_hook
 
         include InstanceMethods
       end
     end
 
     module InstanceMethods
-      def metrics_hook(hooked)
+      def __top_level_around_hook(hooked)
         timing_start = Time.now
         _log_before
 
-        _metrics_wrapper do
+        _configurable_around_wrapper do
           (@outcome, @exception) = _call_and_return_outcome(hooked)
         end
 
@@ -26,10 +26,10 @@ module Action
 
       private
 
-      def _metrics_wrapper(&)
-        return yield unless Action.config.metrics_hook
+      def _configurable_around_wrapper(&)
+        return yield unless Action.config.top_level_around_hook
 
-        Action.config.metrics_hook.call(self.class.name || "AnonymousClass", &)
+        Action.config.top_level_around_hook.call(self.class.name || "AnonymousClass", &)
       end
 
       def _log_before
@@ -54,7 +54,7 @@ module Action
         "success"
       rescue StandardError => e
         [
-          e.is_a?(Action::Failure) ? "expected_failure" : "exception",
+          e.is_a?(Action::Failure) ? "failure" : "exception",
           e
         ]
       end
