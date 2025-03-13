@@ -5,7 +5,7 @@ require "active_support/parameter_filter"
 module Action
   class ContextFacade
     def initialize(action:, context:, allowed_fields:)
-      if self.class.name == "Action::ContextFacade"
+      if self.class.name == "Action::ContextFacade" # rubocop:disable Style/ClassEqualityComparison
         raise "Action::ContextFacade is an abstract class and should not be instantiated directly"
       end
 
@@ -34,7 +34,7 @@ module Action
     def exposure_method_name = raise NotImplementedError
 
     # Add nice error message for missing methods
-    def method_missing(method_name, ...)
+    def method_missing(method_name, ...) # rubocop:disable Style/MissingRespondToMissing (because we're not actually responding to anything additional)
       if context.respond_to?(method_name)
         msg = <<~MSG
           Method ##{method_name} is not available on #{self.class.name}!
@@ -52,7 +52,9 @@ module Action
 
   # Inbound / Internal ContextFacade
   class InternalContext < ContextFacade
-    private def exposure_method_name = :expects
+    private
+
+    def exposure_method_name = :expects
   end
 
   # Outbound / External ContextFacade
