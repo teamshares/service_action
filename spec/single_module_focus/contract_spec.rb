@@ -46,15 +46,15 @@ RSpec.describe Action::Contract do
   end
 
   context "inbound context facade inspect" do
-    subject { interactor.call(foo: 11).the_inbound_context.inspect }
+    subject { interactor.call(foo: 11).the_internal_context.inspect }
 
     let(:interactor) do
       build_interactor(described_class) do
         expects :foo, type: Numeric, numericality: { greater_than: 10 }
-        exposes :the_inbound_context
+        exposes :the_internal_context
 
         def call
-          expose :the_inbound_context, inbound_context
+          expose :the_internal_context, internal_context
         end
       end
     end

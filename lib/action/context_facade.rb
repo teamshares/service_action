@@ -20,18 +20,6 @@ module Action
 
     def inspect = Inspector.new(facade: self, interactor:, context:, direction:).call
 
-    delegate :success?, :failure?, :error, :exception, to: :context
-    def ok? = success?
-
-    def success
-      return unless success?
-
-      interactor.class.instance_variable_get("@success_message").presence || GENERIC_SUCCESS_MESSAGE
-    end
-    GENERIC_SUCCESS_MESSAGE = "Action completed successfully"
-
-    def message = error || success
-
     def fail!(...)
       raise Action::ContractViolation::MethodNotAllowed,
             "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
@@ -43,6 +31,7 @@ module Action
 
     def exposure_method_name = direction == :inbound ? :expects : :exposes
 
+    # TODO: can just add these as delegations to the outbound/external context?
     INTERNALLY_USED_METHODS = %i[called! rollback! each_pair].freeze
 
     # Add nice error message for missing methods
@@ -52,7 +41,7 @@ module Action
         # (since in our version, we want to disallow implementing services to directly access context).
         #
         # To avoid rewriting the methods directly to change to use @context, we redefine #context to
-        # return the #outbound_context.  That's great for external access, but in the outbound context case
+        # return the #external_context.  That's great for external access, but in the outbound context case
         # we need to allow the internal control methods to pass through.
         return context.send(method_name, ...) if direction == :outbound && INTERNALLY_USED_METHODS.include?(method_name)
 
@@ -74,6 +63,20 @@ module Action
 
       super
     end
+  end
+
+  class Result < ContextFacade
+    delegate :success?, :failure?, :error, :exception, to: :context
+    def ok? = success?
+
+    def success
+      return unless success?
+
+      interactor.class.instance_variable_get("@success_message").presence || GENERIC_SUCCESS_MESSAGE
+    end
+    GENERIC_SUCCESS_MESSAGE = "Action completed successfully"
+
+    def message = error || success
   end
 
   class Inspector

@@ -60,7 +60,7 @@ module Action
           @inbound_validations[field].merge!(additional_validations) if additional_validations.present?
 
           # Allow local access to explicitly-expected fields
-          define_method(field) { inbound_context.public_send(field) }
+          define_method(field) { internal_context.public_send(field) }
 
           @inbound_defaults[field] = default if default.present?
 
@@ -92,12 +92,12 @@ module Action
     end
 
     module InstanceMethods
-      def inbound_context = @inbound_context ||= ContextFacade.new(self, :inbound, @context)
-      def outbound_context = @outbound_context ||= ContextFacade.new(self, :outbound, @context)
+      def internal_context = @internal_context ||= ContextFacade.new(self, :inbound, @context)
+      def external_context = @external_context ||= Result.new(self, :outbound, @context)
 
       # NOTE: ideally no direct access from client code, but we need to expose this for internal Interactor methods
       # (and passing through control methods to underlying context) in order to avoid rewriting internal methods.
-      def context = outbound_context
+      def context = external_context
 
       # Accepts either two positional arguments (key, value) or a hash of key/value pairs
       def expose(*args, **kwargs)
@@ -111,7 +111,7 @@ module Action
         end
 
         kwargs.each do |key, value|
-          raise Action::ContractViolation::InvalidExposure, key unless outbound_context.respond_to?(key)
+          raise Action::ContractViolation::InvalidExposure, key unless external_context.respond_to?(key)
 
           @context.public_send("#{key}=", value)
         end
@@ -135,7 +135,7 @@ module Action
         raise ArgumentError, "Invalid direction: #{direction}" unless %i[inbound outbound].include?(direction)
 
         validations = self.class.instance_variable_get("@#{direction}_validations")
-        context = direction == :inbound ? inbound_context : outbound_context
+        context = direction == :inbound ? internal_context : external_context
 
         ContractValidator.validate!(validations:, direction:, context:)
       end
