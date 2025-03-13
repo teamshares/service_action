@@ -147,8 +147,9 @@ module Action
 
         validations = self.class.instance_variable_get("@#{direction}_validations")
         context = direction == :inbound ? internal_context : external_context
+        exception_klass = direction == :inbound ? Action::InboundValidationError : Action::OutboundValidationError
 
-        ContractValidator.validate!(validations:, direction:, context:)
+        ContractValidator.validate!(validations:, context:, exception_klass:)
       end
 
       def context_for_logging(direction = nil)

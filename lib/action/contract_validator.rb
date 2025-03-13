@@ -12,7 +12,7 @@ module Action
       @context.public_send(attr)
     end
 
-    def self.validate!(validations:, direction:, context:)
+    def self.validate!(validations:, context:, exception_klass:)
       validator = Class.new(self) do
         def self.name = "Action::ContractValidator::OneOff"
 
@@ -25,7 +25,6 @@ module Action
 
       return if validator.valid?
 
-      exception_klass = direction == :inbound ? Action::InboundValidationError : Action::OutboundValidationError
       raise exception_klass, validator.errors
     end
 
