@@ -33,7 +33,7 @@ module Action
     def message = error || success
 
     def fail!(...)
-      raise Action::ContextFacade::MethodNotAllowed,
+      raise Action::ContractViolation::MethodNotAllowed,
             "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
     end
 
@@ -63,7 +63,7 @@ module Action
             #{exposure_method_name} :#{method_name}
         MSG
 
-        raise Action::ContextFacade::MethodNotAllowed, msg
+        raise Action::ContractViolation::MethodNotAllowed, msg
       end
 
       super

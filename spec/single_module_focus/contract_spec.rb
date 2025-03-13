@@ -27,12 +27,12 @@ RSpec.describe Action::Contract do
       # Defined on context, but only allowed on inbound facade
       expect do
         subject.foo
-      end.to raise_error(Action::ContextFacade::MethodNotAllowed)
+      end.to raise_error(Action::ContractViolation::MethodNotAllowed)
 
       # Defined on context, but blocked by facade
       expect do
         subject.baz
-      end.to raise_error(Action::ContextFacade::MethodNotAllowed)
+      end.to raise_error(Action::ContractViolation::MethodNotAllowed)
 
       # Not defined at all on context
       expect { subject.quz }.to raise_error(NoMethodError)
@@ -66,7 +66,7 @@ RSpec.describe Action::Contract do
     subject { interactor.call(foo: 9, bar: 12, baz: 13) }
 
     it "fails inbound" do
-      expect { subject }.to raise_error(Action::Contract::Violation::InboundValidation)
+      expect { subject }.to raise_error(Action::ContractViolation::InboundValidationFailed)
     end
   end
 
@@ -74,7 +74,7 @@ RSpec.describe Action::Contract do
     subject { interactor.call(bar: 12, baz: 13) }
 
     it "fails inbound" do
-      expect { subject }.to raise_error(Action::Contract::Violation::InboundValidation)
+      expect { subject }.to raise_error(Action::ContractViolation::InboundValidationFailed)
     end
   end
 
@@ -82,7 +82,7 @@ RSpec.describe Action::Contract do
     subject { interactor.call(foo: 11, baz: 13) }
 
     it "fails" do
-      expect { subject }.to raise_error(Action::Contract::Violation::OutboundValidation)
+      expect { subject }.to raise_error(Action::ContractViolation::OutboundValidationFailed)
     end
   end
 
@@ -168,13 +168,13 @@ RSpec.describe Action::Contract do
       it {
         expect do
           subject
-        end.to raise_error(Action::Contract::Violation::InboundValidation, "Foo is not one of String, Numeric")
+        end.to raise_error(Action::ContractViolation::InboundValidationFailed, "Foo is not one of String, Numeric")
       }
     end
 
     context "when false" do
       let(:foo) { false }
-      it { expect { subject }.to raise_error(Action::Contract::Violation::InboundValidation, "Foo can't be blank") }
+      it { expect { subject }.to raise_error(Action::ContractViolation::InboundValidationFailed, "Foo can't be blank") }
     end
   end
 
@@ -195,7 +195,7 @@ RSpec.describe Action::Contract do
     context "when nil" do
       let(:foo) { nil }
       it {
-        expect { subject }.to raise_error(Action::Contract::Violation::InboundValidation, "Foo must be true or false")
+        expect { subject }.to raise_error(Action::ContractViolation::InboundValidationFailed, "Foo must be true or false")
       }
     end
   end
@@ -214,7 +214,7 @@ RSpec.describe Action::Contract do
 
     context "when one invalid" do
       let(:bar) { "string" }
-      it { expect { subject }.to raise_error(Action::Contract::Violation::InboundValidation, "Bar should numberz") }
+      it { expect { subject }.to raise_error(Action::ContractViolation::InboundValidationFailed, "Bar should numberz") }
     end
 
     context "when set" do
@@ -274,7 +274,7 @@ RSpec.describe Action::Contract do
       let(:input) { "" }
 
       it "raises" do
-        expect { subject }.to raise_error(Action::Contract::Violation::PreprocessingError)
+        expect { subject }.to raise_error(Action::ContractViolation::PreprocessingError)
       end
     end
   end
@@ -296,7 +296,7 @@ RSpec.describe Action::Contract do
 
     context "when invalid" do
       let(:foo) { 10 }
-      it { expect { subject }.to raise_error(Action::Contract::Violation::InboundValidation, "Foo must be pretty big") }
+      it { expect { subject }.to raise_error(Action::ContractViolation::InboundValidationFailed, "Foo must be pretty big") }
     end
 
     context "when validator raises" do
@@ -309,7 +309,7 @@ RSpec.describe Action::Contract do
       it {
         expect do
           subject
-        end.to raise_error(Action::Contract::Violation::InboundValidation, "Foo failed validation: oops")
+        end.to raise_error(Action::ContractViolation::InboundValidationFailed, "Foo failed validation: oops")
       }
     end
   end
@@ -332,7 +332,7 @@ RSpec.describe Action::Contract do
     context "when invalid" do
       let(:foo) { 1 }
       let(:bar) { "string" }
-      it { expect { subject }.to raise_error(Action::Contract::Violation::InboundValidation, "Bar is not a Numeric") }
+      it { expect { subject }.to raise_error(Action::ContractViolation::InboundValidationFailed, "Bar is not a Numeric") }
     end
   end
 end

@@ -59,7 +59,7 @@ RSpec.describe "Organizing" do
     context "with non-string date" do
       let(:date) { Date.parse("2020-01-01") }
 
-      it { expect { subject }.to raise_error(Action::Contract::Violation::InboundValidation, "Date is not a String") }
+      it { expect { subject }.to raise_error(Action::ContractViolation::InboundValidationFailed, "Date is not a String") }
     end
 
     context "with invalid date string" do
@@ -79,7 +79,7 @@ RSpec.describe "Organizing" do
       it { expect(subject.year).to eq(2020) }
 
       it "cannot access non-declared fields" do
-        expect { subject.date }.to raise_error(NoMethodError)
+        expect { subject.date }.to raise_error(Action::ContractViolation::MethodNotAllowed)
       end
     end
 

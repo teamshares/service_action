@@ -111,7 +111,7 @@ module Action
         end
 
         kwargs.each do |key, value|
-          raise Action::Contract::Violation::InvalidExposure, key unless outbound_context.respond_to?(key)
+          raise Action::ContractViolation::InvalidExposure, key unless outbound_context.respond_to?(key)
 
           @context.public_send("#{key}=", value)
         end
@@ -124,7 +124,7 @@ module Action
           new_value = processor.call(@context.public_send(field))
           @context.public_send("#{field}=", new_value)
         rescue StandardError => e
-          raise Action::Contract::Violation::PreprocessingError, "Error preprocessing field '#{field}': #{e.message}"
+          raise Action::ContractViolation::PreprocessingError, "Error preprocessing field '#{field}': #{e.message}"
         end
       end
 
