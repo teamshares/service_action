@@ -20,7 +20,7 @@ RSpec.describe Action do
       it "fails" do
         expect(subject).to be_failure
         expect(subject.error).to eq("Something went wrong")
-        expect(subject.exception).to be_a(Action::ContractViolation::InboundValidationError)
+        expect(subject.exception).to be_a(Action::InboundValidationError)
         expect(subject.exception.errors).to be_a(ActiveModel::Errors)
         expect(subject.exception.message).to eq("Foo must be greater than 10")
       end
@@ -63,7 +63,7 @@ RSpec.describe Action do
       it "fails" do
         expect(subject).to be_failure
         expect(subject.error).to eq("Something went wrong")
-        expect(subject.exception).to be_a(Action::ContractViolation::OutboundValidationError)
+        expect(subject.exception).to be_a(Action::OutboundValidationError)
         expect(subject.exception.errors).to be_a(ActiveModel::Errors)
         expect(subject.exception.message).to eq("Bar must be greater than 10")
       end
@@ -110,7 +110,7 @@ RSpec.describe Action do
       it "fails" do
         expect(subject).to be_failure
         expect(subject.error).to eq("Something went wrong")
-        expect(subject.exception).to be_a(Action::ContractViolation::InboundValidationError)
+        expect(subject.exception).to be_a(Action::InboundValidationError)
         expect(subject.exception.errors).to be_a(ActiveModel::Errors)
         expect(subject.exception.message).to eq("Foo is not a String")
       end
