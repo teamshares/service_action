@@ -92,8 +92,8 @@ module Action
     end
 
     module InstanceMethods
-      def internal_context = @internal_context ||= ContextFacade.new(self, :inbound, @context)
-      def external_context = @external_context ||= Result.new(self, :outbound, @context)
+      def internal_context = @internal_context ||= build_context_facade(:inbound)
+      def external_context = @external_context ||= build_context_facade(:outbound)
 
       # NOTE: ideally no direct access from client code, but we need to expose this for internal Interactor methods
       # (and passing through control methods to underlying context) in order to avoid rewriting internal methods.
@@ -115,6 +115,17 @@ module Action
 
           @context.public_send("#{key}=", value)
         end
+      end
+
+      private
+
+      def build_context_facade(direction)
+        raise ArgumentError, "Invalid direction: #{direction}" unless %i[inbound outbound].include?(direction)
+
+        klass = direction == :inbound ? Action::InternalContext : Action::Result
+        allowed_fields = self.class.instance_variable_get("@#{direction}_accessors").compact
+
+        klass.new(action: self, context: @context, allowed_fields:)
       end
     end
 

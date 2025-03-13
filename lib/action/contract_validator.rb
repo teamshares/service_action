@@ -29,7 +29,7 @@ module Action
       raise exception_klass, validator.errors
     end
 
-    # Allow for custom validators to be defined in the context of the interactor
+    # Allow for custom validators to be defined in the context of the action
     class ValidateValidator < ActiveModel::EachValidator
       def validate_each(record, attribute, value)
         msg = begin

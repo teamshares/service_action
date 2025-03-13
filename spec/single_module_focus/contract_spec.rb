@@ -41,7 +41,7 @@ RSpec.describe Action::Contract do
     describe "#inspect" do
       subject { result.inspect }
 
-      it { is_expected.to eq("#<OutboundContextFacade [OK] bar: 12>") }
+      it { is_expected.to eq("#<Action::Result [OK] bar: 12>") }
     end
   end
 
@@ -59,7 +59,7 @@ RSpec.describe Action::Contract do
       end
     end
 
-    it { is_expected.to eq "#<InboundContextFacade foo: 11>" }
+    it { is_expected.to eq "#<Action::InternalContext foo: 11>" }
   end
 
   context "with validations" do

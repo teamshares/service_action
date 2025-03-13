@@ -4,12 +4,14 @@ require "active_support/parameter_filter"
 
 module Action
   class ContextFacade
-    def initialize(interactor, direction, context)
-      @context = context
-      @direction = direction
-      @interactor = interactor
+    def initialize(action:, context:, allowed_fields:)
+      if self.class.name == "Action::ContextFacade"
+        raise "Action::ContextFacade is an abstract class and should not be instantiated directly"
+      end
 
-      @allowed_fields = @interactor.class.instance_variable_get("@#{direction}_accessors").compact
+      @context = context
+      @action = action
+      @allowed_fields = allowed_fields
 
       @allowed_fields.each do |field|
         singleton_class.define_method(field) { @context.public_send(field) }
@@ -18,7 +20,7 @@ module Action
 
     attr_reader :allowed_fields
 
-    def inspect = Inspector.new(facade: self, interactor:, context:, direction:).call
+    def inspect = Inspector.new(facade: self, action:, context:).call
 
     def fail!(...)
       raise Action::ContractViolation::MethodNotAllowed,
@@ -27,28 +29,17 @@ module Action
 
     private
 
-    attr_reader :interactor, :direction, :context
+    attr_reader :action, :context
 
-    def exposure_method_name = direction == :inbound ? :expects : :exposes
-
-    # TODO: can just add these as delegations to the outbound/external context?
-    INTERNALLY_USED_METHODS = %i[called! rollback! each_pair].freeze
+    def exposure_method_name = raise NotImplementedError
 
     # Add nice error message for missing methods
     def method_missing(method_name, ...)
       if context.respond_to?(method_name)
-        # Ideally Interactor base module would use @context rather than the context accessor
-        # (since in our version, we want to disallow implementing services to directly access context).
-        #
-        # To avoid rewriting the methods directly to change to use @context, we redefine #context to
-        # return the #external_context.  That's great for external access, but in the outbound context case
-        # we need to allow the internal control methods to pass through.
-        return context.send(method_name, ...) if direction == :outbound && INTERNALLY_USED_METHODS.include?(method_name)
-
         msg = <<~MSG
-          Method ##{method_name} is not available on the #{@direction} context facade!
+          Method ##{method_name} is not available on #{self.class.name}!
 
-          #{@interactor.class.name || "The interactor"} is missing a line like:
+          #{@action.class.name || "The action"} may be missing a line like:
             #{exposure_method_name} :#{method_name}
         MSG
 
@@ -57,52 +48,56 @@ module Action
 
       super
     end
-
-    def respond_to_missing?(method_name, include_private = false)
-      return direction == :outbound && INTERNALLY_USED_METHODS.include?(method_name) if context.respond_to?(method_name)
-
-      super
-    end
   end
 
+  # Inbound / Internal ContextFacade
+  class InternalContext < ContextFacade
+    private def exposure_method_name = :expects
+  end
+
+  # Outbound / External ContextFacade
   class Result < ContextFacade
+    # Poke some holes for necessary internal control methods
+    delegate :called!, :rollback!, :each_pair, to: :context
+
+    # External interface
     delegate :success?, :failure?, :error, :exception, to: :context
     def ok? = success?
 
     def success
       return unless success?
 
-      interactor.class.instance_variable_get("@success_message").presence || GENERIC_SUCCESS_MESSAGE
+      action.class.instance_variable_get("@success_message").presence || GENERIC_SUCCESS_MESSAGE
     end
     GENERIC_SUCCESS_MESSAGE = "Action completed successfully"
 
     def message = error || success
+
+    private
+
+    def exposure_method_name = :exposes
   end
 
   class Inspector
-    def initialize(interactor:, facade:, context:, direction:)
-      @interactor = interactor
+    def initialize(action:, facade:, context:)
+      @action = action
       @facade = facade
       @context = context
-      @direction = direction
     end
-
-    def class_name = "#{direction.to_s.capitalize}ContextFacade"
 
     def call
       str = [status, visible_fields].compact_blank.join(" ")
 
-      "#<#{direction.to_s.capitalize}ContextFacade #{str}>"
+      "#<#{class_name} #{str}>"
     end
 
     private
 
-    attr_reader :interactor, :facade, :context, :direction
-
-    def direction_label = direction.to_s.capitalize
+    attr_reader :action, :facade, :context
 
     def status
-      return unless direction == :outbound
+      return unless facade.is_a?(Action::Result)
+
       return "[OK]" if context.success?
       return "[failed with '#{context.error}']" unless context.exception
 
@@ -111,13 +106,14 @@ module Action
 
     def visible_fields
       allowed_fields.map do |field|
-        value = @facade.public_send(field)
+        value = facade.public_send(field)
 
         "#{field}: #{format_for_inspect(field, value)}"
       end.join(", ")
     end
 
-    def allowed_fields = @facade.send(:allowed_fields)
+    def class_name = facade.class.name
+    def allowed_fields = facade.send(:allowed_fields)
 
     def format_for_inspect(field, value)
       return value.inspect if value.nil?
@@ -137,6 +133,6 @@ module Action
       inspection_filter.filter_param(field, inspected_value)
     end
 
-    def inspection_filter = interactor.send(:inspection_filter)
+    def inspection_filter = action.send(:inspection_filter)
   end
 end

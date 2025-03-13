@@ -33,7 +33,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   # Core dependencies
-  spec.add_dependency "activemodel", "> 7.0" # For contract validation
-  spec.add_dependency "activesupport", "> 7.0" # For compact_blank and friends
-  spec.add_dependency "interactor", "3.1.2" # Organize business logic into interactors
+  spec.add_dependency "activemodel", "> 7.0"    # For contract validation
+  spec.add_dependency "activesupport", "> 7.0"  # For compact_blank and friends
+  spec.add_dependency "interactor", "3.1.2"     # We're building on this scaffolding for organizing business logic
 end
