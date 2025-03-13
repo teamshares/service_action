@@ -25,7 +25,7 @@ module Action
 
       return if validator.valid?
 
-      exception_klass = direction == :inbound ? Action::ContractViolation::InboundValidationFailed : Action::ContractViolation::OutboundValidationFailed
+      exception_klass = direction == :inbound ? Action::ContractViolation::InboundValidationError : Action::ContractViolation::OutboundValidationError
       raise exception_klass, validator.errors
     end
 

@@ -26,7 +26,7 @@ module Action
       def message = "Attempted to expose unknown key '#{@key}': be sure to declare it with `exposes :#{@key}`"
     end
 
-    class ValidationFailed < ContractViolation
+    class ValidationError < ContractViolation
       attr_reader :errors
 
       def initialize(errors)
@@ -38,7 +38,7 @@ module Action
       def to_s = message
     end
 
-    class InboundValidationFailed < ValidationFailed; end
-    class OutboundValidationFailed < ValidationFailed; end
+    class InboundValidationError < ValidationError; end
+    class OutboundValidationError < ValidationError; end
   end
 end

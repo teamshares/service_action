@@ -41,7 +41,7 @@ RSpec.describe Action do
       let(:foo) { 9 }
 
       it {
-        is_expected.to eq "#<OutboundContextFacade [failed with Action::ContractViolation::InboundValidationFailed: 'Foo must be greater than 10'] bar: nil, phone: nil, the_inbound_context: nil>" # rubocop:disable Metrics/LineLength
+        is_expected.to eq "#<OutboundContextFacade [failed with Action::ContractViolation::InboundValidationError: 'Foo must be greater than 10'] bar: nil, phone: nil, the_inbound_context: nil>" # rubocop:disable Metrics/LineLength
       }
     end
 
