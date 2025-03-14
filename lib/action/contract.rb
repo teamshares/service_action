@@ -11,14 +11,9 @@ module Action
   module Contract
     def self.included(base)
       base.class_eval do
-        @inbound_preprocessing ||= {}
-        @inbound_accessors ||= []
-        @outbound_accessors ||= []
-        @sensitive_fields ||= []
-        @inbound_defaults = {}
-        @outbound_defaults = {}
-        @inbound_validations = Hash.new { |h, k| h[k] = {} }
-        @outbound_validations = Hash.new { |h, k| h[k] = {} }
+        class_attribute :internal_field_configs, :external_field_configs
+        self.internal_field_configs ||= []
+        self.external_field_configs ||= []
 
         extend ClassMethods
         include InstanceMethods
@@ -29,65 +24,60 @@ module Action
 
         around do |hooked|
           apply_inbound_preprocessing!
-          apply_inbound_defaults!
+          apply_defaults!(:inbound)
           validate_contract!(:inbound)
           hooked.call
-          apply_outbound_defaults!
+          apply_defaults!(:outbound)
           validate_contract!(:outbound)
         end
       end
     end
 
+    FieldConfig = Data.define(:field, :validations, :default, :preprocess, :sensitive)
+
     module ClassMethods
       def expects(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false,
-                  **additional_validations)
-        fields.map do |field|
-          @inbound_accessors << field
-          @inbound_preprocessing[field] = preprocess if preprocess.present?
-          @sensitive_fields << field if sensitive
+                  **validations)
+        configs = parse_field_configs(*fields, allow_blank:, default:, preprocess:, sensitive:, **validations)
 
-          if allow_blank
-            additional_validations.transform_values! do |v|
-              v = { value: v } unless v.is_a?(Hash)
-              { allow_blank: true }.merge(v)
-            end
-          else
-            # TODO: do we need to merge allow_blank into all _other_ validations' options?
-            @inbound_validations[field][:presence] = !additional_validations.key?(:boolean)
-          end
-
-          # TODO: do we need to merge allow_blank into all subsequent validations' options?
-          @inbound_validations[field].merge!(additional_validations) if additional_validations.present?
-
-          # Allow local access to explicitly-expected fields
+        # Allow local access to explicitly-expected fields
+        fields.each do |field|
           define_method(field) { internal_context.public_send(field) }
-
-          @inbound_defaults[field] = default if default.present?
-
-          field
         end
+
+        # NOTE: the dup may be unnecessary, but being careful to avoid letting a child's config modify the parent value
+        # (children get their own class_attribute, BUT if the value is mutated we're just modifying the same object)
+        self.internal_field_configs = self.internal_field_configs.dup + configs
+
+        fields
       end
 
-      def exposes(*fields, allow_blank: false, default: nil, sensitive: false, **additional_validations)
-        fields.map do |field|
-          @outbound_accessors << field
-          @sensitive_fields << field if sensitive
+      def exposes(*fields, allow_blank: false, default: nil, sensitive: false, **validations)
+        configs = parse_field_configs(*fields, allow_blank:, default:, preprocess: nil, sensitive:, **validations)
 
-          if allow_blank
-            additional_validations.transform_values! do |v|
-              v = { value: v } unless v.is_a?(Hash)
-              { allow_blank: true }.merge(v)
-            end
-          else
-            # TODO: do we need to merge allow_blank into all _other_ validations' options?
-            @outbound_validations[field][:presence] = !additional_validations.key?(:boolean)
+        # NOTE: the dup may be unnecessary, but being careful to avoid letting a child's config modify the parent value
+        # (children get their own class_attribute, BUT if the value is mutated we're just modifying the same object)
+        self.external_field_configs = self.external_field_configs.dup + configs
+
+        fields
+      end
+
+      private
+
+      def parse_field_configs(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false,
+                              **validations)
+        if allow_blank
+          validations.transform_values! do |v|
+            v = { value: v } unless v.is_a?(Hash)
+            { allow_blank: true }.merge(v)
           end
-
-          @outbound_validations[field].merge!(additional_validations) if additional_validations.present?
-          @outbound_defaults[field] = default if default.present?
-
-          field
+        elsif validations.key?(:boolean)
+          validations[:presence] = false
+        else
+          validations[:presence] = true unless validations.key?(:presence)
         end
+
+        fields.map { |field| FieldConfig.new(field:, validations:, default:, preprocess:, sensitive:) }
       end
     end
 
@@ -123,7 +113,7 @@ module Action
         raise ArgumentError, "Invalid direction: #{direction}" unless %i[inbound outbound].include?(direction)
 
         klass = direction == :inbound ? Action::InternalContext : Action::Result
-        allowed_fields = self.class.instance_variable_get("@#{direction}_accessors").compact
+        allowed_fields = fields(direction)
 
         klass.new(action: self, context: @context, allowed_fields:)
       end
@@ -131,36 +121,48 @@ module Action
 
     module ValidationInstanceMethods
       def apply_inbound_preprocessing!
-        self.class.instance_variable_get("@inbound_preprocessing").each do |field, processor|
-          new_value = processor.call(@context.public_send(field))
-          @context.public_send("#{field}=", new_value)
+        internal_field_configs.each do |config|
+          next unless config.preprocess
+
+          initial_value = @context.public_send(config.field)
+          new_value = config.preprocess.call(initial_value)
+          @context.public_send("#{config.field}=", new_value)
         rescue StandardError => e
-          raise Action::ContractViolation::PreprocessingError, "Error preprocessing field '#{field}': #{e.message}"
+          raise Action::ContractViolation::PreprocessingError, "Error preprocessing field '#{config.field}': #{e.message}"
         end
       end
-
-      def apply_inbound_defaults! = apply_defaults! self.class.instance_variable_get("@inbound_defaults")
-      def apply_outbound_defaults! = apply_defaults! self.class.instance_variable_get("@outbound_defaults")
 
       def validate_contract!(direction)
         raise ArgumentError, "Invalid direction: #{direction}" unless %i[inbound outbound].include?(direction)
 
-        validations = self.class.instance_variable_get("@#{direction}_validations")
+        configs = direction == :inbound ? internal_field_configs : external_field_configs
+        validations = configs.each_with_object({}) do |config, hash|
+          hash[config.field] = config.validations
+        end
         context = direction == :inbound ? internal_context : external_context
         exception_klass = direction == :inbound ? Action::InboundValidationError : Action::OutboundValidationError
 
         ContractValidator.validate!(validations:, context:, exception_klass:)
       end
 
-      def context_for_logging(direction = nil)
-        fields = case direction
-                 when :inbound then self.class.instance_variable_get("@inbound_accessors")
-                 when :outbound then self.class.instance_variable_get("@outbound_accessors")
-                 else
-                   self.class.instance_variable_get("@inbound_accessors") + self.class.instance_variable_get("@outbound_accessors")
-                 end
+      def apply_defaults!(direction)
+        raise ArgumentError, "Invalid direction: #{direction}" unless %i[inbound outbound].include?(direction)
 
-        inspection_filter.filter(@context.to_h.slice(*fields))
+        configs = direction == :inbound ? internal_field_configs : external_field_configs
+        defaults_mapping = configs.each_with_object({}) do |config, hash|
+          hash[config.field] = config.default
+        end.compact
+
+        defaults_mapping.each do |field, default_value|
+          unless @context.public_send(field)
+            @context.public_send("#{field}=",
+                                 default_value.respond_to?(:call) ? default_value.call : default_value)
+          end
+        end
+      end
+
+      def context_for_logging(direction = nil)
+        inspection_filter.filter(@context.to_h.slice(*fields(direction)))
       end
 
       protected
@@ -170,18 +172,19 @@ module Action
       end
 
       def sensitive_fields
-        self.class.instance_variable_get("@sensitive_fields").compact
+        (internal_field_configs + external_field_configs).select(&:sensitive).map(&:field)
       end
 
-      private
+      def fields(direction)
+        raise ArgumentError, "Invalid direction: #{direction}" unless direction.nil? || %i[inbound outbound].include?(direction)
 
-      def apply_defaults!(defaults_mapping)
-        defaults_mapping.each do |field, default_value|
-          unless @context.public_send(field)
-            @context.public_send("#{field}=",
-                                 default_value.respond_to?(:call) ? default_value.call : default_value)
-          end
-        end
+        configs = case direction
+                  when :inbound then internal_field_configs
+                  when :outbound then external_field_configs
+                  else (internal_field_configs + external_field_configs)
+                  end
+
+        configs.map(&:field)
       end
     end
   end
