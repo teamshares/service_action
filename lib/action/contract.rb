@@ -11,9 +11,7 @@ module Action
   module Contract
     def self.included(base)
       base.class_eval do
-        class_attribute :internal_field_configs, :external_field_configs
-        self.internal_field_configs ||= []
-        self.external_field_configs ||= []
+        class_attribute :internal_field_configs, :external_field_configs, default: []
 
         extend ClassMethods
         include InstanceMethods
@@ -47,9 +45,8 @@ module Action
           duplicated = internal_field_configs.map(&:field) & configs.map(&:field)
           raise Action::DuplicateFieldError, "Duplicate field(s) declared: #{duplicated.join(", ")}" if duplicated.any?
 
-          # NOTE: the dup may be unnecessary, but being careful to avoid letting a child's config modify the parent value
-          # (children get their own class_attribute, BUT if the value is mutated we're just modifying the same object)
-          self.internal_field_configs = self.internal_field_configs.dup + configs
+          # NOTE: avoid <<, which would update value for parents and children
+          self.internal_field_configs += configs
         end
       end
 
@@ -58,9 +55,8 @@ module Action
           duplicated = external_field_configs.map(&:field) & configs.map(&:field)
           raise Action::DuplicateFieldError, "Duplicate field(s) declared: #{duplicated.join(", ")}" if duplicated.any?
 
-          # NOTE: the dup may be unnecessary, but being careful to avoid letting a child's config modify the parent value
-          # (children get their own class_attribute, BUT if the value is mutated we're just modifying the same object)
-          self.external_field_configs = self.external_field_configs.dup + configs
+          # NOTE: avoid <<, which would update value for parents and children
+          self.external_field_configs += configs
         end
       end
 
