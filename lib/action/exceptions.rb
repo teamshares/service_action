@@ -27,6 +27,8 @@ module Action
     end
   end
 
+  class DuplicateFieldError < ContractViolation; end
+
   class ValidationError < ContractViolation
     attr_reader :errors
 

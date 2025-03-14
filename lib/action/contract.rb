@@ -38,28 +38,30 @@ module Action
     module ClassMethods
       def expects(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false,
                   **validations)
-        configs = parse_field_configs(*fields, allow_blank:, default:, preprocess:, sensitive:, **validations)
-
         # Allow local access to explicitly-expected fields
         fields.each do |field|
           define_method(field) { internal_context.public_send(field) }
         end
 
-        # NOTE: the dup may be unnecessary, but being careful to avoid letting a child's config modify the parent value
-        # (children get their own class_attribute, BUT if the value is mutated we're just modifying the same object)
-        self.internal_field_configs = self.internal_field_configs.dup + configs
+        parse_field_configs(*fields, allow_blank:, default:, preprocess:, sensitive:, **validations).tap do |configs|
+          duplicated = internal_field_configs.map(&:field) & configs.map(&:field)
+          raise Action::DuplicateFieldError, "Duplicate field(s) declared: #{duplicated.join(", ")}" if duplicated.any?
 
-        fields
+          # NOTE: the dup may be unnecessary, but being careful to avoid letting a child's config modify the parent value
+          # (children get their own class_attribute, BUT if the value is mutated we're just modifying the same object)
+          self.internal_field_configs = self.internal_field_configs.dup + configs
+        end
       end
 
       def exposes(*fields, allow_blank: false, default: nil, sensitive: false, **validations)
-        configs = parse_field_configs(*fields, allow_blank:, default:, preprocess: nil, sensitive:, **validations)
+        parse_field_configs(*fields, allow_blank:, default:, preprocess: nil, sensitive:, **validations).tap do |configs|
+          duplicated = external_field_configs.map(&:field) & configs.map(&:field)
+          raise Action::DuplicateFieldError, "Duplicate field(s) declared: #{duplicated.join(", ")}" if duplicated.any?
 
-        # NOTE: the dup may be unnecessary, but being careful to avoid letting a child's config modify the parent value
-        # (children get their own class_attribute, BUT if the value is mutated we're just modifying the same object)
-        self.external_field_configs = self.external_field_configs.dup + configs
-
-        fields
+          # NOTE: the dup may be unnecessary, but being careful to avoid letting a child's config modify the parent value
+          # (children get their own class_attribute, BUT if the value is mutated we're just modifying the same object)
+          self.external_field_configs = self.external_field_configs.dup + configs
+        end
       end
 
       private
@@ -113,7 +115,7 @@ module Action
         raise ArgumentError, "Invalid direction: #{direction}" unless %i[inbound outbound].include?(direction)
 
         klass = direction == :inbound ? Action::InternalContext : Action::Result
-        allowed_fields = fields(direction)
+        allowed_fields = declared_fields(direction)
 
         klass.new(action: self, context: @context, allowed_fields:)
       end
@@ -162,7 +164,7 @@ module Action
       end
 
       def context_for_logging(direction = nil)
-        inspection_filter.filter(@context.to_h.slice(*fields(direction)))
+        inspection_filter.filter(@context.to_h.slice(*declared_fields(direction)))
       end
 
       protected
@@ -175,7 +177,7 @@ module Action
         (internal_field_configs + external_field_configs).select(&:sensitive).map(&:field)
       end
 
-      def fields(direction)
+      def declared_fields(direction)
         raise ArgumentError, "Invalid direction: #{direction}" unless direction.nil? || %i[inbound outbound].include?(direction)
 
         configs = case direction

@@ -130,7 +130,7 @@ RSpec.describe Action::Contract do
     end
   end
 
-  context "can expose" do
+  describe "#expose" do
     subject { interactor.call }
 
     let(:interactor) do
@@ -138,6 +138,7 @@ RSpec.describe Action::Contract do
         exposes :qux
 
         def call
+          expose :qux, 11 # Just confirming can call twice
           expose :qux, 99
         end
       end
@@ -314,25 +315,80 @@ RSpec.describe Action::Contract do
     end
   end
 
-  describe "accepts multiple fields per expects line" do
-    subject { interactor.call(foo:, bar:) }
+  describe "#expects" do
+    context "with multiple fields per expects line" do
+      subject { interactor.call(foo:, bar:) }
 
-    let(:interactor) do
-      build_interactor(described_class) do
-        expects :foo, :bar, type: Numeric
+      let(:interactor) do
+        build_interactor(described_class) do
+          expects :foo, :bar, type: Numeric
+        end
+      end
+
+      context "when valid" do
+        let(:foo) { 1 }
+        let(:bar) { 2 }
+        it { is_expected.to be_success }
+      end
+
+      context "when invalid" do
+        let(:foo) { 1 }
+        let(:bar) { "string" }
+        it { expect { subject }.to raise_error(Action::InboundValidationError, "Bar is not a Numeric") }
       end
     end
 
-    context "when valid" do
-      let(:foo) { 1 }
-      let(:bar) { 2 }
-      it { is_expected.to be_success }
+    context "with multiple expectations on the same field" do
+      let(:interactor) do
+        build_interactor(described_class) do
+          expects :foo, type: String
+          expects :foo, numericality: { greater_than: 10 }
+        end
+      end
+
+      it "raises" do
+        expect { interactor.call(foo: 100) }.to raise_error(Action::DuplicateFieldError, "Duplicate field(s) declared: foo")
+      end
+    end
+  end
+
+  describe "#exposes" do
+    context "with multiple fields per expects line" do
+      subject { interactor.call(baz:) }
+
+      let(:baz) { 100 }
+      let(:interactor) do
+        build_interactor(described_class) do
+          expects :baz
+          exposes :foo, :bar, type: Numeric
+
+          def call
+            expose foo: baz, bar: baz
+          end
+        end
+      end
+
+      context "when valid" do
+        it { is_expected.to be_success }
+      end
+
+      context "when invalid" do
+        let(:baz) { "string" }
+        it { expect { subject }.to raise_error(Action::OutboundValidationError, "Foo is not a Numeric and Bar is not a Numeric") }
+      end
     end
 
-    context "when invalid" do
-      let(:foo) { 1 }
-      let(:bar) { "string" }
-      it { expect { subject }.to raise_error(Action::InboundValidationError, "Bar is not a Numeric") }
+    context "with multiple expectations on the same field" do
+      let(:interactor) do
+        build_interactor(described_class) do
+          exposes :foo, type: String
+          exposes :foo, numericality: { greater_than: 10 }
+        end
+      end
+
+      it "raises" do
+        expect { interactor.call(baz: 100) }.to raise_error(Action::DuplicateFieldError, "Duplicate field(s) declared: foo")
+      end
     end
   end
 end
