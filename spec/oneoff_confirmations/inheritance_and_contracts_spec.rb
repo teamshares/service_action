@@ -28,7 +28,7 @@ RSpec.describe "One-off confirmation: inheritance and contracts" do
     end
   end
 
-  it "works as expected" do
+  it "does not modify other classes' configs when inheriting" do
     config_ids = [base, version_a, version_b].map(&:internal_field_configs).map(&:object_id)
     expect(config_ids.uniq.size).to eq(3)
   end
