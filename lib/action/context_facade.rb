@@ -68,9 +68,20 @@ module Action
     def success
       return unless success?
 
-      action.class.instance_variable_get("@success_message").presence || GENERIC_SUCCESS_MESSAGE
+      msg = action.custom_success
+
+      if msg.respond_to?(:call)
+        begin
+          msg = action.instance_exec(&msg)
+        rescue StandardError => e
+          action.warn("Ignoring #{e.class.name} in success message callable: #{e.message}")
+        end
+      end
+
+      msg.presence || action.default_success
     end
-    GENERIC_SUCCESS_MESSAGE = "Action completed successfully"
+
+    def ok = success
 
     def message = error || success
 

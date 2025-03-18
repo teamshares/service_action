@@ -50,7 +50,7 @@ RSpec.describe Action::SwallowExceptions do
       context "with custom generic error message" do
         subject { result.error }
 
-        before { interactor.error_message("Custom error message") }
+        before { interactor.messages(default_error: "Custom error message") }
 
         it "uses the generic override" do
           is_expected.to eq("Custom error message")
@@ -59,7 +59,7 @@ RSpec.describe Action::SwallowExceptions do
         context "with per-exception-type overrides as string" do
           let(:interactor) do
             build_interactor(described_class) do
-              error_message RuntimeError: "RUNTIME ERROR"
+              messages error: ->(e) { "RUNTIME ERROR" if e.is_a?(RuntimeError) }
 
               def call
                 raise "Some internal issue!"
@@ -72,10 +72,26 @@ RSpec.describe Action::SwallowExceptions do
           end
         end
 
+        context "with per-exception-type overrides as string" do
+          let(:interactor) do
+            build_interactor(described_class) do
+              messages error: ->(e) { "RUNTIME ERROR" if e.is_a?(RuntimeError) }
+
+              def call
+                raise ArgumentError, "Some internal issue!"
+              end
+            end
+          end
+
+          it "falls back to default" do
+            is_expected.to eq("Custom error message")
+          end
+        end
+
         context "with per-exception-type overrides as callable" do
           let(:interactor) do
             build_interactor(described_class) do
-              error_message RuntimeError => ->(e) { "RUNTIME: #{e.message}" }
+              messages error: ->(e) { "RUNTIME: #{e.message}" if e.is_a?(RuntimeError) }
 
               def call
                 raise "Some internal issue!"

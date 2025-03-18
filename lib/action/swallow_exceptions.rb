@@ -4,6 +4,10 @@ module Action
   module SwallowExceptions
     def self.included(base)
       base.class_eval do
+        class_attribute :custom_success, :custom_error
+        class_attribute :default_success, default: "Action completed successfully"
+        class_attribute :default_error, default: "Something went wrong"
+
         include InstanceMethods
         extend ClassMethods
 
@@ -37,7 +41,7 @@ module Action
         rescue StandardError => e
           # No action needed -- downstream #on_exception implementation should ideally log any internal failures, but
           # we don't want exception *handling* failures to cascade and overwrite the original exception.
-          log("Ignoring #{e.class.name} in on_exception hook: #{e.message}", :warn)
+          warn("Ignoring #{e.class.name} in on_exception hook: #{e.message}")
         end
 
         class << base
@@ -58,64 +62,31 @@ module Action
     end
 
     module ClassMethods
-      def success_message(message)
-        # NOTE: maybe in the future we'll want more complexity here, but for now just a string
-        raise ArgumentError, "success_message must be called with a string" unless message.is_a?(String)
+      def messages(success: nil, default_success: nil, error: nil, default_error: nil)
+        self.custom_success = success if success.present?
+        self.default_success = default_success if default_success.present?
+        self.custom_error = error if error.present?
+        self.default_error = default_error if default_error.present?
 
-        @success_message = message
-      end
-
-      def error_message(*args, **kwargs)
-        case args.size
-        when 0 # no action needed
-        when 1 then kwargs.merge!(default: args.last)
-        when 2 then kwargs.merge!(args.first => args.last)
-        else
-          raise ArgumentError,
-                "error_message must be called with either two positional arguments or a hash of key/value pairs"
-        end
-
-        unless kwargs.keys.all? do |k|
-          k.is_a?(Class) || k.is_a?(String) || k.is_a?(Symbol)
-        end
-          raise ArgumentError,
-                "error_message keys must be exception class names (or the classes themselves)"
-        end
-
-        unless kwargs.values.all? do |k|
-          k.is_a?(String) || k.respond_to?(:call)
-        end
-          raise ArgumentError,
-                "error_message values must be strings (the message to return) or callable"
-        end
-
-        @message_by_exception_klass = (@message_by_exception_klass || {}).merge(kwargs.stringify_keys)
-      end
-
-      GENERIC_ERROR_MESSAGE = "Something went wrong"
-
-      def generic_error_message
-        @message_by_exception_klass ||= {}
-        @message_by_exception_klass["default"] || GENERIC_ERROR_MESSAGE
+        true
       end
 
       def determine_error_message_for(exception)
-        @message_by_exception_klass ||= {}
+        msg = custom_error
 
-        # TODO: is exact string match correct, or should we be using #ancestors.include?
-        custom = @message_by_exception_klass[exception.class.to_s] || @message_by_exception_klass["default"]
-
-        if custom.respond_to?(:call)
+        if msg.respond_to?(:call)
           begin
-            return custom.call(exception)
+            msg = if msg.arity == 1
+                    instance_exec(exception, &msg)
+                  else
+                    instance_exec(&msg)
+                  end
           rescue StandardError => e
-            log("Ignoring #{e.class.name} in error_message callable: #{e.message}", :warn)
+            warn("Ignoring #{e.class.name} in error message callable: #{e.message}")
           end
-        elsif custom.present?
-          return custom
         end
 
-        GENERIC_ERROR_MESSAGE
+        msg.presence || default_error
       end
     end
 

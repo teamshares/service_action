@@ -12,7 +12,7 @@ class DateParser
     expose date: Date.parse(date)
   end
 
-  error_message "Parsing the date went poorly"
+  messages error: "Parsing the date went poorly"
 end
 
 class DateEvaluator

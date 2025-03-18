@@ -1,17 +1,23 @@
 # frozen_string_literal: true
 
 RSpec.describe Action do
-  describe "#error_message configuration (for #error when swallowing exceptions)" do
+  describe "#custom_error configuration (for #error when swallowing exceptions)" do
     let(:klass) { nil }
 
     let(:action) do
       build_action do
         expects :klass, allow_blank: true
 
-        success_message "great news"
-
-        error_message "baseline message", RuntimeError => "RUN RUN RUN"
-        error_message ArgumentError, ->(e) { "Bad args: #{e.message}" }
+        messages(
+          success: "great news",
+          default_error: "baseline message",
+          error: lambda { |e|
+            case e
+            when RuntimeError then "RUN RUN RUN"
+            when ArgumentError then "Bad args: #{e.message}"
+            end
+          }
+        )
 
         def call
           return if klass.blank?
@@ -26,7 +32,7 @@ RSpec.describe Action do
     it { is_expected.to be_success }
     it { expect(subject.success).to eq("great news") }
     it { expect(subject.message).to eq("great news") }
-    it { expect(action.generic_error_message).to eq("baseline message") }
+    it { expect(action.default_error).to eq("baseline message") }
 
     context "with RuntimeError" do
       let(:klass) { RuntimeError }
