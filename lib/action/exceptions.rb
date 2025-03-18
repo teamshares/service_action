@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Action
-  # Raised internally when fail_with is called -- triggers failure + rollback handling
+  # Raised internally when fail! is called -- triggers failure + rollback handling
   class Failure < StandardError
     attr_reader :context
 

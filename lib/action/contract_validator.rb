@@ -55,7 +55,8 @@ module Action
       def validate_each(record, attribute, value)
         return if value.blank? # Handled with a separate default presence validator
 
-        types = options[:in] || Array(options[:with])
+        # TODO: the last one (:value) might be my fault from the make-it-a-hash fallback in #parse_field_configs
+        types = options[:in].presence || Array(options[:with]).presence || Array(options[:value]).presence
 
         msg = types.size == 1 ? "is not a #{types.first}" : "is not one of #{types.join(", ")}"
         record.errors.add attribute, (options[:message] || msg) unless types.any? { |type| value.is_a?(type) }

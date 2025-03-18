@@ -16,7 +16,7 @@ RSpec.describe Action do
       is_expected.not_to be_success
       expect(subject.error).to eq("Something went wrong")
       expect(subject.exception).to be_a(Action::ContractViolation::MethodNotAllowed)
-      expect(subject.exception.message).to eq "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
+      expect(subject.exception.message).to eq "Call fail! directly rather than on the context"
     end
   end
 end

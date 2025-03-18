@@ -14,7 +14,7 @@ RSpec.describe Action do
         expose :bar, foo * 10
         expose :phone, "123-456-7890"
         expose :the_internal_context, internal_context
-        fail_with "intentional error" if foo == 13
+        fail! "intentional error" if foo == 13
       end
     end
   end

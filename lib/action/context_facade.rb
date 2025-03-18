@@ -23,8 +23,7 @@ module Action
     def inspect = Inspector.new(facade: self, action:, context:).call
 
     def fail!(...)
-      raise Action::ContractViolation::MethodNotAllowed,
-            "Cannot fail! directly -- either use fail_with or allow an exception to bubble up uncaught"
+      raise Action::ContractViolation::MethodNotAllowed, "Call fail! directly rather than on the context"
     end
 
     private

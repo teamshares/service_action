@@ -18,7 +18,7 @@ module Action
 
           @context.exception = e
 
-          fail_with(self.class.determine_error_message_for(e))
+          fail!(self.class.determine_error_message_for(e))
         end
 
         alias_method :original_run!, :run!
@@ -122,7 +122,7 @@ module Action
     module InstanceMethods
       private
 
-      def fail_with(message)
+      def fail!(message)
         @context.error = message
         @context.instance_variable_set("@failure", true)
 
@@ -133,7 +133,7 @@ module Action
       def noncritical
         yield
       rescue Action::Failure => e
-        # NOTE: reraising so we can still fail_with from inside the block
+        # NOTE: reraising so we can still fail! from inside the block
         raise e
       rescue StandardError => e
         trigger_on_exception(e)

@@ -25,10 +25,10 @@ module Action
     end
 
     module InstanceMethods
-      # NOTE: override to use the `depends_on` method (internally, replaces call! with call + overrides to use @context directly)
+      # NOTE: override to use the `hoist` method (internally, replaces call! with call + overrides to use @context directly)
       def call
         self.class.organized.each do |interactor|
-          depends_on { interactor.call(@context) }
+          hoist { interactor.call(@context) }
         end
       end
     end

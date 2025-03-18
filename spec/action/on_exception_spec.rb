@@ -36,11 +36,11 @@ RSpec.describe Action do
 
     let(:action) do
       build_action do
-        expects :should_fail_with, allow_blank: true, default: false
+        expects :should_fail, allow_blank: true, default: false
 
         def call
           noncritical do
-            fail_with "allow intentional failure to bubble" if should_fail_with
+            fail! "allow intentional failure to bubble" if should_fail
             raise "Some internal issue!"
           end
         end
@@ -52,8 +52,8 @@ RSpec.describe Action do
       is_expected.to be_success
     end
 
-    context "with an explicit fail_with" do
-      subject { action.call(should_fail_with: true) }
+    context "with an explicit fail!" do
+      subject { action.call(should_fail: true) }
 
       it "allows the failure to bubble up" do
         expect(described_class.config).not_to receive(:on_exception)

@@ -18,7 +18,7 @@ set up configuration to log at info level for all:
     * note call! still logs completion even if failure (from configuration's on_exception)
 * enqueue vs enqueue!
     * enqueue will not retry even if fails
-    * enqueue! will go through normal sidekiq retries on any failure (including user-facing `fail_with`)
+    * enqueue! will go through normal sidekiq retries on any failure (including user-facing `fail!`)
     * Note implicit GlobalID support (if not serializable, will get ArgumentError at callsite)
 
 * General note: the inbound/outbound contexts are views into an underlying shared object (passed down through organize calls) -- modifications of one will affect the other (e.g. preprocessing inbound args implicitly transforms them on the underlying context, which is echoed if you also expose it on outbound).
@@ -27,10 +27,10 @@ set up configuration to log at info level for all:
 
 * setting `sensitive: true` on any param will filter that value out when inspecting or passing to on_exception
 * feature: `noncritical do` - within this block, any exceptions will be logged (on_exception handler), but will NOT fail the interactor
-    edge case: `fail_with` _will_ still fail the parent interactor
+    edge case: `fail!` _will_ still fail the parent interactor
 * logging - all entrance/exit logged by default at debug level. can set logger level, or define class method targeted_for_debug_logging? = true, or set the env var... (Ability to toggle on debug logging for any specific actor without going through CI run.)
 
-* depends_on -- (CAUTION: if there are multiple calls per block, only the last one will be checked)
+* hoist -- (CAUTION: if there are multiple calls per block, only the last one will be checked)
 
 ---
 

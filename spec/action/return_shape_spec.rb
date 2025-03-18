@@ -12,11 +12,11 @@ RSpec.describe Action do
       end
     end
 
-    context "when fail_with (user facing error)" do
+    context "when fail! (user facing error)" do
       let(:action) do
         build_action do
           def call
-            fail_with("User-facing error")
+            fail!("User-facing error")
           end
         end
       end

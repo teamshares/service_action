@@ -38,7 +38,7 @@ RSpec.describe Action do
       let(:action) do
         build_action do
           def call
-            fail_with "User-facing error"
+            fail! "User-facing error"
           end
         end
       end

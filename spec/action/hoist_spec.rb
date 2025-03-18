@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Action do
-  describe "#depends_on" do
+  describe "#hoist" do
     subject { action.call(subaction:) }
 
     let(:subaction) { build_action }
@@ -10,7 +10,7 @@ RSpec.describe Action do
       build_action do
         expects :subaction
         def call
-          depends_on(error_prefix: "Sub") { subaction.call }
+          hoist(error_prefix: "Sub") { subaction.call }
         end
       end
     end
@@ -20,7 +20,7 @@ RSpec.describe Action do
     context "when the subaction fails" do
       let(:subaction) do
         build_action do
-          def call = fail_with("subaction failed")
+          def call = fail!("subaction failed")
         end
       end
 
@@ -36,14 +36,14 @@ RSpec.describe Action do
       it { expect(subject.error).to eq("Something went wrong") }
       it { expect(subject.exception).to be_a(ArgumentError) }
       it {
-        expect(subject.exception.message).to eq("#depends_on is expected to wrap an Action call, but it returned a String instead")
+        expect(subject.exception.message).to eq("#hoist is expected to wrap an Action call, but it returned a String instead")
       }
 
       context "and it raises" do
         let(:subaction) { -> { raise "subaction raised" } }
 
         before do
-          expect(action).to receive(:warn).with("DependsOn block raised an exception: subaction raised")
+          expect(action).to receive(:warn).with("hoisted block raised an exception: subaction raised")
         end
 
         it { is_expected.not_to be_ok }
@@ -52,19 +52,19 @@ RSpec.describe Action do
       end
     end
 
-    context "when the depends_on not given a block" do
+    context "when the hoist not given a block" do
       let(:action) do
         build_action do
           expects :subaction
           def call
-            depends_on(error_prefix: "Sub")
+            hoist(error_prefix: "Sub")
           end
         end
       end
 
       it { is_expected.not_to be_ok }
       it { expect(subject.exception).to be_a(ArgumentError) }
-      it { expect(subject.exception.message).to eq("#depends_on must be given a block to execute") }
+      it { expect(subject.exception.message).to eq("#hoist must be given a block to execute") }
     end
   end
 end

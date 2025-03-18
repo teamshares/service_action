@@ -97,9 +97,9 @@ By design, `result.error` is always safe to show to the user.
 
 We make a clear distinction between user-facing and internal errors.
 
-#### User-facing errors (`fail_with`)
+#### User-facing errors (`fail!`)
 
-For _known_ failure modes, you can call `fail_with("Some user-facing explanation")` at any time to abort execution and set `result.error` to your custom message.
+For _known_ failure modes, you can call `fail!("Some user-facing explanation")` at any time to abort execution and set `result.error` to your custom message.
 
 #### Internal errors (uncaught `raise`)
 
@@ -128,7 +128,7 @@ class Actions::Slack::Post
 
   before do
     # NOTE: this could be done at the top of `call`, but using a before hook leaves the main method more scannable
-    fail_with "You are not authorized to post to '#{channel}'" unless authorized? # [!code focus]
+    fail! "You are not authorized to post to '#{channel}'" unless authorized? # [!code focus]
   end
 
   def call
@@ -187,6 +187,6 @@ end
 ```
 
 Note this simple pattern handles multiple levels of "failure":
-* Showing specific user-facing flash messages for any arbitrary logic you want in your action (from `fail_with`)
+* Showing specific user-facing flash messages for any arbitrary logic you want in your action (from `fail!`)
 * Showing generic error message if anything went wrong internally (e.g. the Slack client raised an exception -- it's been logged for the team to investigate, but the controller doesn't need to care _what_ went wrong)
 * Showing generic error message if any of your declared interface expectations fail (e.g. if the exposed `thread_id`, which we pulled from Slack's API response, somehow _isn't_ a String)

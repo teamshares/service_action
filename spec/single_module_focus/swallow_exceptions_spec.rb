@@ -14,11 +14,11 @@ RSpec.describe Action::SwallowExceptions do
       end
     end
 
-    context "when fail_with (user facing error)" do
+    context "when fail! (user facing error)" do
       let(:interactor) do
         build_interactor(described_class) do
           def call
-            fail_with("User-facing error")
+            fail!("User-facing error")
           end
         end
       end

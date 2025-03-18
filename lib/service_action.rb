@@ -13,7 +13,7 @@ require_relative "action/top_level_around_hook"
 require_relative "action/logging"
 require_relative "action/contract"
 require_relative "action/swallow_exceptions"
-require_relative "action/depends_on"
+require_relative "action/hoist"
 
 require_relative "action/organizer"
 require_relative "action/enqueueable"
@@ -33,7 +33,7 @@ module Action
       include Contract
       include SwallowExceptions
 
-      include DependsOn
+      include Hoist
 
       include Enqueueable
 
