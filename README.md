@@ -30,7 +30,7 @@ set up configuration to log at info level for all:
     edge case: `fail!` _will_ still fail the parent interactor
 * logging - all entrance/exit logged by default at debug level. can set logger level, or define class method targeted_for_debug_logging? = true, or set the env var... (Ability to toggle on debug logging for any specific actor without going through CI run.)
 
-* hoist_error -- (CAUTION: if there are multiple calls per block, only the last one will be checked)
+* hoist_errors -- (CAUTION: if there are multiple calls per block, only the last one will be checked)
 
 ---
 
