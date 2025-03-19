@@ -31,7 +31,7 @@ RSpec.describe Action do
     end
   end
 
-  describe "#noncritical" do
+  describe "#try" do
     subject { action.call }
 
     let(:action) do
@@ -39,7 +39,7 @@ RSpec.describe Action do
         expects :should_fail, allow_blank: true, default: false
 
         def call
-          noncritical do
+          try do
             fail! "allow intentional failure to bubble" if should_fail
             raise "Some internal issue!"
           end

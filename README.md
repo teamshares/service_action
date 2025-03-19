@@ -26,7 +26,7 @@ set up configuration to log at info level for all:
     Note `context_for_logging` is available (filtered to accessible attrs, filtering out sensitive values). Automatically passed into `on_exception` hook.
 
 * setting `sensitive: true` on any param will filter that value out when inspecting or passing to on_exception
-* feature: `noncritical do` - within this block, any exceptions will be logged (on_exception handler), but will NOT fail the interactor
+* feature: `noncritical do` [UPDATE: `try do`] - within this block, any exceptions will be logged (on_exception handler), but will NOT fail the interactor
     edge case: `fail!` _will_ still fail the parent interactor
 * logging - all entrance/exit logged by default at debug level. can set logger level, or define class method targeted_for_debug_logging? = true, or set the env var... (Ability to toggle on debug logging for any specific actor without going through CI run.)
 

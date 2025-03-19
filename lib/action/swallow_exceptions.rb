@@ -101,7 +101,7 @@ module Action
         raise Action::Failure.new(message, @context)
       end
 
-      def noncritical
+      def try
         yield
       rescue Action::Failure => e
         # NOTE: reraising so we can still fail! from inside the block
