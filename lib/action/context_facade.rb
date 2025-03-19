@@ -71,10 +71,11 @@ module Action
       msg = action.custom_success
 
       if msg.respond_to?(:call)
-        begin
-          msg = action.instance_exec(&msg)
+        msg = begin
+          action.instance_exec(&msg)
         rescue StandardError => e
           action.warn("Ignoring #{e.class.name} in success message callable: #{e.message}")
+          nil
         end
       end
 

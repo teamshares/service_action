@@ -4,6 +4,24 @@ RSpec.describe Action do
   describe "#messages configuration" do
     subject(:result) { action.call }
 
+    describe "fail_prefix" do
+      subject { result.error }
+
+      context "when static" do
+        let(:action) do
+          build_action do
+            messages(fail_prefix: "PREFIX")
+            def call
+              fail! "a message"
+            end
+          end
+        end
+
+        it { expect(result).not_to be_ok }
+        it { is_expected.to eq("PREFIX a message") }
+      end
+    end
+
     describe "success message" do
       subject { result.success }
 
@@ -21,7 +39,8 @@ RSpec.describe Action do
       context "when dynamic" do
         let(:action) do
           build_action do
-            messages(success: -> { "Great news: #{@var}" })
+            expects :foo, default: "bar"
+            messages(success: -> { "Great news: #{@var} from #{foo}" })
 
             def call
               @var = 123
@@ -30,8 +49,48 @@ RSpec.describe Action do
         end
 
         it { expect(result).to be_ok }
-        it "is evaluated within internal context" do
-          is_expected.to eq("Great news: 123")
+        it "is evaluated within internal context + expected vars" do
+          is_expected.to eq("Great news: 123 from bar")
+        end
+      end
+
+      context "when dynamic with exposed vars" do
+        let(:action) do
+          build_action do
+            exposes :foo, default: "bar"
+            messages(success: -> { "Great news: #{@var} from #{foo}" })
+
+            def call
+              expose foo: "baz"
+              @var = 123
+            end
+          end
+        end
+
+        it { expect(result).to be_ok }
+        it "is evaluated within internal context + expected vars" do
+          is_expected.to eq("Great news: 123 from bar")
+        end
+      end
+
+      context "when dynamic raises error" do
+        let(:action) do
+          build_action do
+            expects :foo, default: "bar"
+            messages(
+              default_success: "much success",
+              success: -> { "Great news: #{@var} from #{foo} and #{some_undefined_var}" }
+            )
+
+            def call
+              @var = 123
+            end
+          end
+        end
+
+        it { expect(result).to be_ok }
+        it "falls back to default success" do
+          is_expected.to eq("much success")
         end
       end
 

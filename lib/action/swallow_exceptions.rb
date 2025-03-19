@@ -4,7 +4,7 @@ module Action
   module SwallowExceptions
     def self.included(base)
       base.class_eval do
-        class_attribute :custom_success, :custom_error
+        class_attribute :custom_success, :custom_error, :fail_prefix
         class_attribute :default_success, default: "Action completed successfully"
         class_attribute :default_error, default: "Something went wrong"
 
@@ -29,6 +29,7 @@ module Action
         alias_method :run!, :run_with_exception_swallowing!
 
         # Tweaked to check @context.object_id rather than context (since forwarding object_id causes Ruby to complain)
+        # TODO: do we actually need the object_id check?
         def run
           run!
         rescue Action::Failure => e
@@ -62,11 +63,12 @@ module Action
     end
 
     module ClassMethods
-      def messages(success: nil, default_success: nil, error: nil, default_error: nil)
+      def messages(success: nil, default_success: nil, error: nil, default_error: nil, fail_prefix: nil)
         self.custom_success = success if success.present?
         self.default_success = default_success if default_success.present?
         self.custom_error = error if error.present?
         self.default_error = default_error if default_error.present?
+        self.fail_prefix = fail_prefix if fail_prefix.present?
 
         true
       end
@@ -75,14 +77,15 @@ module Action
         msg = custom_error
 
         if msg.respond_to?(:call)
-          begin
-            msg = if msg.arity == 1
-                    instance_exec(exception, &msg)
-                  else
-                    instance_exec(&msg)
-                  end
+          msg = begin
+            if msg.arity == 1
+              instance_exec(exception, &msg)
+            else
+              instance_exec(&msg)
+            end
           rescue StandardError => e
             warn("Ignoring #{e.class.name} in error message callable: #{e.message}")
+            nil
           end
         end
 
@@ -94,7 +97,11 @@ module Action
       private
 
       def fail!(message)
-        @context.error = message
+        @context.error = if @context.exception
+                           message # got here from rescuing an exception -- don't add fail_prefix
+                         else
+                           [fail_prefix, message].compact.join(" ").squish
+                         end
         @context.instance_variable_set("@failure", true)
 
         # TODO: should we use context_for_logging here? But doublecheck the one place where we're checking object_id on it...

@@ -25,10 +25,10 @@ module Action
     end
 
     module InstanceMethods
-      # NOTE: override to use the `hoist` method (internally, replaces call! with call + overrides to use @context directly)
+      # NOTE: override to use the `hoist_error` method (internally, replaces call! with call + overrides to use @context directly)
       def call
         self.class.organized.each do |interactor|
-          hoist { interactor.call(@context) }
+          hoist_error { interactor.call(@context) }
         end
       end
     end
