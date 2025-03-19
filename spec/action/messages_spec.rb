@@ -116,19 +116,19 @@ RSpec.describe Action do
         let(:action) do
           build_action do
             expects :missing_param
-            messages(error: "Great news!")
+            messages(error: "Bad news!")
           end
         end
 
         it { expect(result).not_to be_ok }
-        it { is_expected.to eq("Great news!") }
+        it { is_expected.to eq("Bad news!") }
       end
 
       context "when dynamic" do
         let(:action) do
           build_action do
             expects :missing_param
-            messages(error: -> { "Great news: #{@var}" })
+            messages(error: -> { "Bad news: #{@var}" })
 
             def call
               @var = 123
@@ -138,7 +138,7 @@ RSpec.describe Action do
 
         it { expect(result).not_to be_ok }
         it "is evaluated within internal context" do
-          is_expected.to eq("Great news: ")
+          is_expected.to eq("Bad news: ")
         end
       end
 
@@ -146,28 +146,28 @@ RSpec.describe Action do
         let(:action) do
           build_action do
             expects :missing_param
-            messages(error: ->(e) { "Great news: #{e.class.name}" })
+            messages(error: ->(e) { "Bad news: #{e.class.name}" })
           end
         end
 
         it { expect(result).not_to be_ok }
         it "is evaluated within internal context" do
-          is_expected.to eq("Great news: Action::InboundValidationError")
+          is_expected.to eq("Bad news: Action::InboundValidationError")
         end
       end
 
-      context "when dynamic returns nil" do
+      context "when dynamic returns blank" do
         let(:action) do
           build_action do
             expects :missing_param
-            messages(default_error: "OK")
+            messages(default_error: "ZZ")
             messages(error: -> { "" })
           end
         end
 
         it { expect(result).not_to be_ok }
         it "falls back to default" do
-          is_expected.to eq("OK")
+          is_expected.to eq("ZZ")
         end
       end
     end

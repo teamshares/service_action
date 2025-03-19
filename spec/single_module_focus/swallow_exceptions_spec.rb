@@ -25,8 +25,11 @@ RSpec.describe Action::SwallowExceptions do
 
       it "is not ok" do
         is_expected.not_to be_success
-        expect(subject.error).to eq("User-facing error")
         expect(subject.exception).to be_nil
+
+        # NOTE: only because the error message generation is defined on the ContextFacade layer,
+        # which we're not pulling in for this set of specs.
+        expect(subject.error).to be_nil
       end
     end
 
@@ -42,67 +45,12 @@ RSpec.describe Action::SwallowExceptions do
       it "is not ok" do
         expect { subject }.not_to raise_error
         is_expected.not_to be_success
-        expect(subject.error).to eq("Something went wrong")
         expect(subject.exception).to be_a(RuntimeError)
         expect(subject.exception.message).to eq("Some internal issue!")
-      end
 
-      context "with custom generic error message" do
-        subject { result.error }
-
-        before { interactor.messages(default_error: "Custom error message") }
-
-        it "uses the generic override" do
-          is_expected.to eq("Custom error message")
-        end
-
-        context "with per-exception-type overrides as string" do
-          let(:interactor) do
-            build_interactor(described_class) do
-              messages error: ->(e) { "RUNTIME ERROR" if e.is_a?(RuntimeError) }
-
-              def call
-                raise "Some internal issue!"
-              end
-            end
-          end
-
-          it "uses the more specific override" do
-            is_expected.to eq("RUNTIME ERROR")
-          end
-        end
-
-        context "with per-exception-type overrides as string" do
-          let(:interactor) do
-            build_interactor(described_class) do
-              messages error: ->(e) { "RUNTIME ERROR" if e.is_a?(RuntimeError) }
-
-              def call
-                raise ArgumentError, "Some internal issue!"
-              end
-            end
-          end
-
-          it "falls back to default" do
-            is_expected.to eq("Custom error message")
-          end
-        end
-
-        context "with per-exception-type overrides as callable" do
-          let(:interactor) do
-            build_interactor(described_class) do
-              messages error: ->(e) { "RUNTIME: #{e.message}" if e.is_a?(RuntimeError) }
-
-              def call
-                raise "Some internal issue!"
-              end
-            end
-          end
-
-          it "uses the more specific override" do
-            is_expected.to eq("RUNTIME: Some internal issue!")
-          end
-        end
+        # NOTE: only because the error message generation is defined on the ContextFacade layer,
+        # which we're not pulling in for this set of specs.
+        expect(subject.error).to be_nil
       end
     end
   end

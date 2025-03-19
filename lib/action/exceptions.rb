@@ -5,12 +5,13 @@ module Action
   class Failure < StandardError
     attr_reader :context
 
-    def initialize(message, context = nil)
-      super(message)
+    def initialize(context = nil, message: nil)
+      super()
+      @message = message if message.present?
       @context = context
     end
 
-    def message = super.presence || "Execution was intentionally stopped"
+    def message = @message.presence || "Execution was halted"
   end
 
   class StepsRequiredForInheritanceSupportError < StandardError

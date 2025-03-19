@@ -11,7 +11,7 @@ module Action
     module InstanceMethods
       private
 
-      MinimalFailedResult = Data.define(:error) do
+      MinimalFailedResult = Data.define(:error, :exception) do
         def ok? = false
       end
 
@@ -26,8 +26,7 @@ module Action
           yield
         rescue StandardError => e
           warn "hoist_errors block swallowed an exception: #{e.message}"
-          @context.exception = e
-          MinimalFailedResult.new(error: self.class.determine_error_message_for_exception(e))
+          MinimalFailedResult.new(error: nil, exception: e)
         end
 
         # This ensures the last line of hoist_errors was an Action call (CAUTION: if there are multiple
@@ -42,7 +41,10 @@ module Action
 
       # Separate method to allow overriding in subclasses
       def handle_hoisted_errors(result, prefix: nil)
-        fail! [prefix, result.error].compact.join(": "), __skip_message_processing: true
+        @context.exception = result.exception if result.exception.present?
+        @context.error_prefix = prefix if prefix.present?
+
+        fail! result.error
       end
     end
   end

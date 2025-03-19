@@ -10,7 +10,7 @@ RSpec.describe Action do
       build_action do
         expects :subaction
         def call
-          hoist_errors(prefix: "Sub") { subaction.call }
+          hoist_errors(prefix: "Sub:") { subaction.call }
         end
       end
     end
@@ -58,7 +58,7 @@ RSpec.describe Action do
         build_action do
           expects :subaction
           def call
-            hoist_errors(prefix: "Sub")
+            hoist_errors(prefix: "Sub:")
           end
         end
       end

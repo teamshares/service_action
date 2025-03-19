@@ -22,14 +22,14 @@ module Action
 
           @context.exception = e
 
-          fail! self.class.determine_error_message_for_exception(e), __skip_message_processing: true
+          fail!
         end
 
         alias_method :original_run!, :run!
         alias_method :run!, :run_with_exception_swallowing!
 
         # Tweaked to check @context.object_id rather than context (since forwarding object_id causes Ruby to complain)
-        # TODO: do we actually need the object_id check?
+        # TODO: do we actually need the object_id check? Do we need this override at all?
         def run
           run!
         rescue Action::Failure => e
@@ -47,13 +47,12 @@ module Action
 
         class << base
           def call_bang_with_unswallowed_exceptions(context = {})
-            original_call!(context)
-          rescue Action::Failure => e
-            # De-swallow the exception, if we caught any
-            raise e.context.exception if e.context.exception
+            result = call(context)
+            return result if result.ok?
 
-            # Otherwise just raise the Failure
-            raise
+            raise result.exception if result.exception
+
+            raise Action::Failure.new(result.instance_variable_get("@context"), message: result.error)
           end
 
           alias_method :original_call!, :call!
@@ -72,46 +71,25 @@ module Action
 
         true
       end
-
-      def determine_error_message_for_exception(exception)
-        msg = custom_error
-
-        if msg.respond_to?(:call)
-          msg = begin
-            if msg.arity == 1
-              instance_exec(exception, &msg)
-            else
-              instance_exec(&msg)
-            end
-          rescue StandardError => e
-            warn("Ignoring #{e.class.name} in error message callable: #{e.message}")
-            nil
-          end
-        end
-
-        msg.presence || default_error
-      end
     end
 
     module InstanceMethods
       private
 
-      # NOTE: when user facing, __skip_message_processing should be false so we apply the fail_prefix
-      # if set. When used internally, it should be true so we don't double-prefix the message.
-      def fail!(message, __skip_message_processing: false) # rubocop:disable Lint/UnderscorePrefixedVariableName
-        message = [fail_prefix, message].compact.join(" ").squish unless __skip_message_processing
-
-        @context.error = message
+      def fail!(message = nil)
         @context.instance_variable_set("@failure", true)
 
+        @context.error_from_user = message if message.present?
+        @context.error_prefix = fail_prefix if fail_prefix.present? && message.present?
+
         # TODO: should we use context_for_logging here? But doublecheck the one place where we're checking object_id on it...
-        raise Action::Failure.new(message, @context)
+        raise Action::Failure.new(@context) # rubocop:disable Style/RaiseArgs
       end
 
       def try
         yield
       rescue Action::Failure => e
-        # NOTE: reraising so we can still fail! from inside the block
+        # NOTE: re-raising so we can still fail! from inside the block
         raise e
       rescue StandardError => e
         trigger_on_exception(e)

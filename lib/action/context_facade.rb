@@ -62,24 +62,28 @@ module Action
     delegate :called!, :rollback!, :each_pair, to: :context
 
     # External interface
-    delegate :success?, :failure?, :error, :exception, to: :context
+    delegate :success?, :failure?, :exception, to: :context
     def ok? = success?
 
+    def error
+      return if ok?
+
+      msg = @context.error_from_user.presence || determine_message(
+        custom: action.custom_error,
+        default: action.default_error,
+        exception:
+      ) || "Something went wrong"
+
+      [@context.error_prefix, msg].compact.join(" ").squeeze(" ")
+    end
+
     def success
-      return unless success?
+      return unless ok?
 
-      msg = action.custom_success
-
-      if msg.respond_to?(:call)
-        msg = begin
-          action.instance_exec(&msg)
-        rescue StandardError => e
-          action.warn("Ignoring #{e.class.name} in success message callable: #{e.message}")
-          nil
-        end
-      end
-
-      msg.presence || action.default_success
+      determine_message(
+        custom: action.custom_success,
+        default: action.default_success
+      ) || "Action completed successfully"
     end
 
     def ok = success
@@ -89,6 +93,26 @@ module Action
     private
 
     def exposure_method_name = :exposes
+
+    def determine_message(custom:, default:, exception: nil)
+      msg = custom
+
+      if msg.respond_to?(:call)
+        msg = begin
+          # The error message callable can take the exception as an argument
+          if exception && msg.arity == 1
+            action.instance_exec(exception, &msg)
+          else
+            action.instance_exec(&msg)
+          end
+        rescue StandardError => e
+          action.warn("Ignoring #{e.class.name} raised while determining message callable: #{e.message}")
+          nil
+        end
+      end
+
+      msg.presence || default
+    end
   end
 
   class Inspector
@@ -112,7 +136,7 @@ module Action
       return unless facade.is_a?(Action::Result)
 
       return "[OK]" if context.success?
-      return "[failed with '#{context.error}']" unless context.exception
+      return "[failed with '#{context.error_from_user}']" unless context.exception
 
       %([failed with #{context.exception.class.name}: '#{context.exception.message}'])
     end
