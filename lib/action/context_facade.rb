@@ -4,21 +4,21 @@ require "active_support/parameter_filter"
 
 module Action
   class ContextFacade
-    def initialize(action:, context:, allowed_fields:)
+    def initialize(action:, context:, declared_fields:, implicitly_allowed_fields: nil)
       if self.class.name == "Action::ContextFacade" # rubocop:disable Style/ClassEqualityComparison
         raise "Action::ContextFacade is an abstract class and should not be instantiated directly"
       end
 
       @context = context
       @action = action
-      @allowed_fields = allowed_fields
+      @declared_fields = declared_fields
 
-      @allowed_fields.each do |field|
+      (@declared_fields + Array(implicitly_allowed_fields)).each do |field|
         singleton_class.define_method(field) { @context.public_send(field) }
       end
     end
 
-    attr_reader :allowed_fields
+    attr_reader :declared_fields
 
     def inspect = Inspector.new(facade: self, action:, context:).call
 
@@ -118,7 +118,7 @@ module Action
     end
 
     def visible_fields
-      allowed_fields.map do |field|
+      declared_fields.map do |field|
         value = facade.public_send(field)
 
         "#{field}: #{format_for_inspect(field, value)}"
@@ -126,7 +126,7 @@ module Action
     end
 
     def class_name = facade.class.name
-    def allowed_fields = facade.send(:allowed_fields)
+    def declared_fields = facade.send(:declared_fields)
 
     def format_for_inspect(field, value)
       return value.inspect if value.nil?

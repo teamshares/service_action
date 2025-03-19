@@ -36,11 +36,6 @@ module Action
     module ClassMethods
       def expects(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false,
                   **validations)
-        # Allow local access to explicitly-expected fields
-        fields.each do |field|
-          define_method(field) { internal_context.public_send(field) }
-        end
-
         parse_field_configs(*fields, allow_blank:, default:, preprocess:, sensitive:, **validations).tap do |configs|
           duplicated = internal_field_configs.map(&:field) & configs.map(&:field)
           raise Action::DuplicateFieldError, "Duplicate field(s) declared: #{duplicated.join(", ")}" if duplicated.any?
@@ -64,6 +59,12 @@ module Action
 
       def parse_field_configs(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false,
                               **validations)
+        # Allow local access to explicitly-expected fields -- even externally-expected needs to be available locally
+        # (e.g. to allow success message callable to reference exposed fields)
+        fields.each do |field|
+          define_method(field) { internal_context.public_send(field) }
+        end
+
         if allow_blank
           validations.transform_values! do |v|
             v = { value: v } unless v.is_a?(Hash)
@@ -111,9 +112,9 @@ module Action
         raise ArgumentError, "Invalid direction: #{direction}" unless %i[inbound outbound].include?(direction)
 
         klass = direction == :inbound ? Action::InternalContext : Action::Result
-        allowed_fields = declared_fields(direction)
+        implicitly_allowed_fields = direction == :inbound ? declared_fields(:outbound) : []
 
-        klass.new(action: self, context: @context, allowed_fields:)
+        klass.new(action: self, context: @context, declared_fields: declared_fields(direction), implicitly_allowed_fields:)
       end
     end
 

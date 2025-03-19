@@ -69,7 +69,7 @@ RSpec.describe Action do
 
         it { expect(result).to be_ok }
         it "is evaluated within internal context + expected vars" do
-          is_expected.to eq("Great news: 123 from bar")
+          is_expected.to eq("Great news: 123 from baz")
         end
       end
 

@@ -390,5 +390,25 @@ RSpec.describe Action::Contract do
         expect { interactor.call(baz: 100) }.to raise_error(Action::DuplicateFieldError, "Duplicate field(s) declared: foo")
       end
     end
+
+    context "is accessible on internal context" do
+      subject { interactor.call }
+
+      let(:interactor) do
+        build_interactor(described_class) do
+          exposes :foo, default: "bar"
+
+          def call
+            puts "Foo is: #{foo}"
+          end
+        end
+      end
+
+      it "is accessible" do
+        # TODO: if we apply defaults earlier, this would say bar
+        expect { subject }.to output("Foo is: \n").to_stdout
+        expect(subject).to be_ok
+      end
+    end
   end
 end
