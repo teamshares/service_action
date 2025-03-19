@@ -22,7 +22,7 @@ module Action
 
           @context.exception = e
 
-          fail! self.class.determine_error_message_for(e), __skip_message_processing: true
+          fail! self.class.determine_error_message_for_exception(e), __skip_message_processing: true
         end
 
         alias_method :original_run!, :run!
@@ -73,7 +73,7 @@ module Action
         true
       end
 
-      def determine_error_message_for(exception)
+      def determine_error_message_for_exception(exception)
         msg = custom_error
 
         if msg.respond_to?(:call)

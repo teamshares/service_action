@@ -27,7 +27,7 @@ module Action
         rescue StandardError => e
           warn "hoist_errors block swallowed an exception: #{e.message}"
           @context.exception = e
-          MinimalFailedResult.new(error: self.class.determine_error_message_for(e))
+          MinimalFailedResult.new(error: self.class.determine_error_message_for_exception(e))
         end
 
         # This ensures the last line of hoist_errors was an Action call (CAUTION: if there are multiple
