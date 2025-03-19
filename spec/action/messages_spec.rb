@@ -107,6 +107,20 @@ RSpec.describe Action do
           is_expected.to eq("OK")
         end
       end
+
+      context "when dynamic returns nil" do
+        let(:action) do
+          build_action do
+            messages(default_success: -> { "Kay" })
+            messages(success: -> { "" })
+          end
+        end
+
+        it { expect(result).to be_ok }
+        it "supports callable default" do
+          is_expected.to eq("Kay")
+        end
+      end
     end
 
     describe "error message" do
@@ -168,6 +182,21 @@ RSpec.describe Action do
         it { expect(result).not_to be_ok }
         it "falls back to default" do
           is_expected.to eq("ZZ")
+        end
+      end
+
+      context "when dynamic returns blank" do
+        let(:action) do
+          build_action do
+            expects :missing_param
+            messages(default_error: -> { "Zay" })
+            messages(error: -> { "" })
+          end
+        end
+
+        it { expect(result).not_to be_ok }
+        it "supports callable default" do
+          is_expected.to eq("Zay")
         end
       end
     end

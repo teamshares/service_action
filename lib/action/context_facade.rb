@@ -95,23 +95,22 @@ module Action
     def exposure_method_name = :exposes
 
     def determine_message(custom:, default:, exception: nil)
-      msg = custom
+      stringified(custom, exception:).presence || stringified(default, exception:).presence
+    end
 
-      if msg.respond_to?(:call)
-        msg = begin
-          # The error message callable can take the exception as an argument
-          if exception && msg.arity == 1
-            action.instance_exec(exception, &msg)
-          else
-            action.instance_exec(&msg)
-          end
-        rescue StandardError => e
-          action.warn("Ignoring #{e.class.name} raised while determining message callable: #{e.message}")
-          nil
-        end
+    # Allow for callable OR string messages
+    def stringified(msg, exception: nil)
+      return msg.presence unless msg.respond_to?(:call)
+
+      # The error message callable can take the exception as an argument
+      if exception && msg.arity == 1
+        action.instance_exec(exception, &msg)
+      else
+        action.instance_exec(&msg)
       end
-
-      msg.presence || default
+    rescue StandardError => e
+      action.warn("Ignoring #{e.class.name} raised while determining message callable: #{e.message}")
+      nil
     end
   end
 

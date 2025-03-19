@@ -37,6 +37,7 @@ RSpec.describe Action do
     context "with user-facing failure" do
       let(:action) do
         build_action do
+          messages fail_prefix: "|||"
           def call
             fail! "User-facing error"
           end
@@ -46,11 +47,11 @@ RSpec.describe Action do
       it "confirming call case" do
         result = action.call
         expect(result).not_to be_success
-        expect(result.error).to eq("User-facing error")
+        expect(result.error).to eq("||| User-facing error")
       end
 
       it "call! raises our own Failure class" do
-        expect { subject }.to raise_error(described_class::Failure, "User-facing error")
+        expect { subject }.to raise_error(described_class::Failure, "||| User-facing error")
       end
     end
   end

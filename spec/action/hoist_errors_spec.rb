@@ -10,7 +10,7 @@ RSpec.describe Action do
       build_action do
         expects :subaction
         def call
-          hoist_errors(prefix: "Sub:") { subaction.call }
+          hoist_errors(prefix: "FROM HOIST:") { subaction.call }
         end
       end
     end
@@ -20,12 +20,13 @@ RSpec.describe Action do
     context "when the subaction fails" do
       let(:subaction) do
         build_action do
+          messages fail_prefix: "SSS"
           def call = fail!("subaction failed")
         end
       end
 
       it { is_expected.not_to be_ok }
-      it { expect(subject.error).to eq("Sub: subaction failed") }
+      it { expect(subject.error).to eq("FROM HOIST: SSS subaction failed") }
       it { expect(subject.exception).to be_nil }
     end
 
@@ -48,7 +49,7 @@ RSpec.describe Action do
         end
 
         it { is_expected.not_to be_ok }
-        it { expect(subject.error).to eq("Sub: Something went wrong") }
+        it { expect(subject.error).to eq("FROM HOIST: Something went wrong") }
         it { expect(subject.exception).not_to eq(nil) }
       end
     end
@@ -58,7 +59,7 @@ RSpec.describe Action do
         build_action do
           expects :subaction
           def call
-            hoist_errors(prefix: "Sub:")
+            hoist_errors(prefix: "FROM HOIST:")
           end
         end
       end
