@@ -26,6 +26,7 @@ module Action
           yield
         rescue StandardError => e
           warn "hoist_errors block swallowed an exception: #{e.message}"
+          @context.exception = e
           MinimalFailedResult.new(error: self.class.determine_error_message_for(e))
         end
 
@@ -41,7 +42,7 @@ module Action
 
       # Separate method to allow overriding in subclasses
       def handle_hoisted_errors(result, prefix: nil)
-        fail!([prefix, result.error].compact.join(": "))
+        fail! [prefix, result.error].compact.join(": "), __skip_message_processing: true
       end
     end
   end

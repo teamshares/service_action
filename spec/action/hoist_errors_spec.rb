@@ -26,6 +26,7 @@ RSpec.describe Action do
 
       it { is_expected.not_to be_ok }
       it { expect(subject.error).to eq("Sub: subaction failed") }
+      it { expect(subject.exception).to be_nil }
     end
 
     context "when the subaction is not an Action" do
@@ -48,7 +49,7 @@ RSpec.describe Action do
 
         it { is_expected.not_to be_ok }
         it { expect(subject.error).to eq("Sub: Something went wrong") }
-        it { expect(subject.exception).to eq(nil) }
+        it { expect(subject.exception).not_to eq(nil) }
       end
     end
 

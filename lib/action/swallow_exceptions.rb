@@ -22,7 +22,7 @@ module Action
 
           @context.exception = e
 
-          fail!(self.class.determine_error_message_for(e))
+          fail! self.class.determine_error_message_for(e), __skip_message_processing: true
         end
 
         alias_method :original_run!, :run!
@@ -96,12 +96,12 @@ module Action
     module InstanceMethods
       private
 
-      def fail!(message)
-        @context.error = if @context.exception
-                           message # got here from rescuing an exception -- don't add fail_prefix
-                         else
-                           [fail_prefix, message].compact.join(" ").squish
-                         end
+      # NOTE: when user facing, __skip_message_processing should be false so we apply the fail_prefix
+      # if set. When used internally, it should be true so we don't double-prefix the message.
+      def fail!(message, __skip_message_processing: false) # rubocop:disable Lint/UnderscorePrefixedVariableName
+        message = [fail_prefix, message].compact.join(" ").squish unless __skip_message_processing
+
+        @context.error = message
         @context.instance_variable_set("@failure", true)
 
         # TODO: should we use context_for_logging here? But doublecheck the one place where we're checking object_id on it...
