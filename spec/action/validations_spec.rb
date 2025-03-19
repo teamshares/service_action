@@ -85,7 +85,7 @@ RSpec.describe Action do
       it "fails" do
         expect(subject).to be_failure
         expect(subject.error).to eq("Something went wrong")
-        expect(subject.exception).to be_a(Action::ContractViolation::InvalidExposure)
+        expect(subject.exception).to be_a(Action::ContractViolation::UnknownExposure)
       end
     end
   end

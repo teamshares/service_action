@@ -35,7 +35,7 @@ module Action
     class MethodNotAllowed < ContractViolation; end
     class PreprocessingError < ContractViolation; end
 
-    class InvalidExposure < ContractViolation
+    class UnknownExposure < ContractViolation
       def initialize(key)
         @key = key
         super()

@@ -99,7 +99,7 @@ module Action
         end
 
         kwargs.each do |key, value|
-          raise Action::ContractViolation::InvalidExposure, key unless external_context.respond_to?(key)
+          raise Action::ContractViolation::UnknownExposure, key unless external_context.respond_to?(key)
 
           @context.public_send("#{key}=", value)
         end
