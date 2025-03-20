@@ -111,7 +111,7 @@ DEPENDENCIES
   rspec (~> 3.2)
   rubocop (~> 1.21)
   service_action!
-  sidekiq (~> 7.3.9)
+  sidekiq (~> 7)
 
 BUNDLED WITH
    2.5.6

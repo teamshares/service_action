@@ -15,3 +15,6 @@ docs/.vitepress/dist
 docs/.vitepress/cache
 node_modules
 yarn-error.log
+
+# As a library we don't need to publish Gemfile.lock
+Gemfile.lock
