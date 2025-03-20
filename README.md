@@ -1,8 +1,8 @@
 # ServiceAction
 
-Just spinning this up -- not yet released (i.e. doc updates to come later).
+Just spinning this up -- not yet released (i.e. doc updates in flight).
 
-## Notes
+## Rough Notes
 set up configuration to log at info level for all:
 
     Action.configure do |c|
@@ -37,34 +37,22 @@ set up configuration to log at info level for all:
 Composition: see composition_spec.rb -- note if you add e.g. an expects, it'll get ADDED to those from the base layer
 Inheritance: work in progress
 
----
 
-TODO: Delete this and the text below, and describe your gem
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/service_action`. To experiment with that code, run `bin/console` for an interactive prompt.
+## Installation & Usage
 
-## Installation
-
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
-
-Install the gem and add to the application's Gemfile by executing:
-
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
-
-If bundler is not being used to manage dependencies, install the gem by executing:
-
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
-
-## Usage
-
-TODO: Write usage instructions here
+See our [User Guide](https://teamshares.github.io/service_action/guide/) for details.
 
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+## Contributions
 
-## Contributing
+Service Action is open source and contributions from the community are encouraged! No contribution is too small.
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/teamshares/service_action.
+See our [contribution guidelines](CONTRIBUTING.md) for more information.
+
+## Thank You
+
+A very special thank you to [Collective Idea](https://collectiveidea.com/)'s fantastic [Interactor](https://github.com/collectiveidea/interactor?tab=readme-ov-file#interactor) library, which [we](https://www.teamshares.com/) used successfully for a number of years and which still forms the basis of this library today.

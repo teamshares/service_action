@@ -11,6 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary = "Pattern for writing callable service objects"
   spec.description = "Contract validation and error swallowing wrappers around Interactor"
   spec.homepage = "https://github.com/teamshares/service-action"
+  spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1.0"
 
   spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
