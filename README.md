@@ -6,13 +6,13 @@ Just spinning this up -- not yet released (i.e. doc updates in flight).
 
 See our [User Guide](https://teamshares.github.io/service_action/guide/) for details.
 
-### !! CAUTION !!
+### Inheritance Support [!!]
 
 Out of the box Service Action only supports a direct style (every action must `include Action`).
 
 If you want to support inheritance, you'll need to add this line to your `Gemfile` (we're layered over Interactor, and their released version doesn't yet support inheritance):
 
-    `gem "interactor", github: "kaspermeyer/interactor", branch: "fix-hook-inheritance"`
+    gem "interactor", github: "kaspermeyer/interactor", branch: "fix-hook-inheritance"
 
 
 ## Development
