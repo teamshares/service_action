@@ -24,6 +24,7 @@ export default defineConfig({
       {
         text: 'Advanced Usage',
         items: [
+          { text: 'Reference', link: '/advanced/reference' },
           { text: 'Validating User Input', link: '/advanced/validating-user-input' },
         ]
       },
