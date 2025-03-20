@@ -43,6 +43,15 @@ Inheritance: work in progress
 
 See our [User Guide](https://teamshares.github.io/service_action/guide/) for details.
 
+### !! CAUTION !!
+
+Out of the box Service Action only supports a direct style (every action must `include Action`).
+
+If you want to support inheritance, you'll need to add this line to your `Gemfile` (we're layered over Interactor, and their released version doesn't yet support inheritance):
+
+    `gem "interactor", github: "kaspermeyer/interactor", branch: "fix-hook-inheritance"`
+
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
