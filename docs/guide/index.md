@@ -154,4 +154,4 @@ For _known_ failure modes, you can call `fail!("Some user-facing explanation")` 
 Any exceptions will be swallowed and the action failed (i.e. _not_ `ok?`). `result.error` will be set to a generic error message ("Something went wrong" by default, but highly configurable).
 <!-- TODO: link to messaging configs -->
 
-The swallowed exception will be available on `result.exception` for your introspection, but it'll also be passed to your `on_exception` handler so, [with a bit of configuration](/getting-started/), you can trust that any exceptions have been logged to your error tracking service automatically (one more thing the dev doesn't need to think about).
+The swallowed exception will be available on `result.exception` for your introspection, but it'll also be passed to your `on_exception` handler so, [with a bit of configuration](/usage/setup), you can trust that any exceptions have been logged to your error tracking service automatically (one more thing the dev doesn't need to think about).
