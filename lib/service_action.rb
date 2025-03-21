@@ -7,10 +7,10 @@ require "interactor"
 
 require "active_support"
 
-require_relative "action/configuration"
 require_relative "action/exceptions"
-require_relative "action/top_level_around_hook"
 require_relative "action/logging"
+require_relative "action/configuration"
+require_relative "action/top_level_around_hook"
 require_relative "action/contract"
 require_relative "action/swallow_exceptions"
 require_relative "action/hoist_errors"
