@@ -13,7 +13,7 @@ module Action
         end
 
         define_method(:perform) do |*args|
-          context = self.class.params_from_global_id(args.first)
+          context = self.class._params_from_global_id(args.first)
           bang = args.size > 1 ? args.last : false
 
           if bang
@@ -24,11 +24,11 @@ module Action
         end
 
         def self.enqueue(context = {})
-          perform_async(process_context_to_sidekiq_args(context))
+          perform_async(_process_context_to_sidekiq_args(context))
         end
 
         def self.enqueue!(context = {})
-          perform_async(process_context_to_sidekiq_args(context), true)
+          perform_async(_process_context_to_sidekiq_args(context), true)
         end
 
         def self.queue_options(opts)
@@ -38,10 +38,10 @@ module Action
 
         private
 
-        def self.process_context_to_sidekiq_args(context)
+        def self._process_context_to_sidekiq_args(context)
           client = Sidekiq::Client.new
 
-          params_to_global_id(context).tap do |args|
+          _params_to_global_id(context).tap do |args|
             if client.send(:json_unsafe?, args).present?
               raise ArgumentError,
                     "Cannot pass non-JSON-serializable objects to Sidekiq. Make sure all objects in the context are serializable (or respond to to_global_id)."
@@ -49,7 +49,7 @@ module Action
           end
         end
 
-        def self.params_to_global_id(context)
+        def self._params_to_global_id(context)
           context.stringify_keys.each_with_object({}) do |(key, value), hash|
             if value.respond_to?(:to_global_id)
               hash["#{key}_as_global_id"] = value.to_global_id.to_s
@@ -59,7 +59,7 @@ module Action
           end
         end
 
-        def self.params_from_global_id(params)
+        def self._params_from_global_id(params)
           params.each_with_object({}) do |(key, value), hash|
             if key.end_with?("_as_global_id")
               hash[key.delete_suffix("_as_global_id")] = GlobalID::Locator.locate(value)

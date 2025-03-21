@@ -15,7 +15,7 @@ module Action
 
     module ClassMethods
       def log(message, level: :info)
-        level = :info if level == :debug && targeted_for_debug_logging?
+        level = :info if level == :debug && _targeted_for_debug_logging?
         msg = %([#{name || "Anonymous Class"}] #{message})
 
         logger.send(level, msg)
@@ -27,7 +27,7 @@ module Action
         end
       end
 
-      def targeted_for_debug_logging?
+      def _targeted_for_debug_logging?
         return true if Action.config.global_debug_logging?
 
         target_class_names = (ENV["SA_DEBUG_TARGETS"] || "").split(",").map(&:strip)

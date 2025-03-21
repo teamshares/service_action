@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+#
+# CAUTION - ALPHA - TODO -- this code is extremely rough -- we have not yet gotten around to using it in production, so
+# consider this a work in progress / an indicator of things to come.
+#
+
 module Action
   # NOTE: replaces, rather than layers on, the upstream Interactor::Organizer module (only three methods, and
   # we want ability to implement a more complex interface where we pass options into the organized interactors)

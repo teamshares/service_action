@@ -35,11 +35,11 @@ RSpec.describe Action do
       end
     end
 
-    describe "with .targeted_for_debug_logging?" do
+    describe "with ._targeted_for_debug_logging?" do
       let(:level) { :debug }
 
       before do
-        allow(action).to receive(:targeted_for_debug_logging?).and_return(targeted_for_debug_logging)
+        allow(action).to receive(:_targeted_for_debug_logging?).and_return(targeted_for_debug_logging)
       end
 
       context "false" do

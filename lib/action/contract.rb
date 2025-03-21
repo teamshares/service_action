@@ -21,12 +21,12 @@ module Action
         remove_method :context
 
         around do |hooked|
-          apply_inbound_preprocessing!
-          apply_defaults!(:inbound)
-          validate_contract!(:inbound)
+          _apply_inbound_preprocessing!
+          _apply_defaults!(:inbound)
+          _validate_contract!(:inbound)
           hooked.call
-          apply_defaults!(:outbound)
-          validate_contract!(:outbound)
+          _apply_defaults!(:outbound)
+          _validate_contract!(:outbound)
         end
       end
     end
@@ -36,7 +36,7 @@ module Action
     module ClassMethods
       def expects(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false,
                   **validations)
-        parse_field_configs(*fields, allow_blank:, default:, preprocess:, sensitive:, **validations).tap do |configs|
+        _parse_field_configs(*fields, allow_blank:, default:, preprocess:, sensitive:, **validations).tap do |configs|
           duplicated = internal_field_configs.map(&:field) & configs.map(&:field)
           raise Action::DuplicateFieldError, "Duplicate field(s) declared: #{duplicated.join(", ")}" if duplicated.any?
 
@@ -46,7 +46,7 @@ module Action
       end
 
       def exposes(*fields, allow_blank: false, default: nil, sensitive: false, **validations)
-        parse_field_configs(*fields, allow_blank:, default:, preprocess: nil, sensitive:, **validations).tap do |configs|
+        _parse_field_configs(*fields, allow_blank:, default:, preprocess: nil, sensitive:, **validations).tap do |configs|
           duplicated = external_field_configs.map(&:field) & configs.map(&:field)
           raise Action::DuplicateFieldError, "Duplicate field(s) declared: #{duplicated.join(", ")}" if duplicated.any?
 
@@ -57,7 +57,7 @@ module Action
 
       private
 
-      def parse_field_configs(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false,
+      def _parse_field_configs(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false,
                               **validations)
         # Allow local access to explicitly-expected fields -- even externally-expected needs to be available locally
         # (e.g. to allow success message callable to reference exposed fields)
@@ -81,8 +81,8 @@ module Action
     end
 
     module InstanceMethods
-      def internal_context = @internal_context ||= build_context_facade(:inbound)
-      def external_context = @external_context ||= build_context_facade(:outbound)
+      def internal_context = @internal_context ||= _build_context_facade(:inbound)
+      def external_context = @external_context ||= _build_context_facade(:outbound)
 
       # NOTE: ideally no direct access from client code, but we need to expose this for internal Interactor methods
       # (and passing through control methods to underlying context) in order to avoid rewriting internal methods.
@@ -108,7 +108,7 @@ module Action
 
       private
 
-      def build_context_facade(direction)
+      def _build_context_facade(direction)
         raise ArgumentError, "Invalid direction: #{direction}" unless %i[inbound outbound].include?(direction)
 
         klass = direction == :inbound ? Action::InternalContext : Action::Result
@@ -119,7 +119,7 @@ module Action
     end
 
     module ValidationInstanceMethods
-      def apply_inbound_preprocessing!
+      def _apply_inbound_preprocessing!
         internal_field_configs.each do |config|
           next unless config.preprocess
 
@@ -131,7 +131,7 @@ module Action
         end
       end
 
-      def validate_contract!(direction)
+      def _validate_contract!(direction)
         raise ArgumentError, "Invalid direction: #{direction}" unless %i[inbound outbound].include?(direction)
 
         configs = direction == :inbound ? internal_field_configs : external_field_configs
@@ -144,7 +144,7 @@ module Action
         ContractValidator.validate!(validations:, context:, exception_klass:)
       end
 
-      def apply_defaults!(direction)
+      def _apply_defaults!(direction)
         raise ArgumentError, "Invalid direction: #{direction}" unless %i[inbound outbound].include?(direction)
 
         configs = direction == :inbound ? internal_field_configs : external_field_configs

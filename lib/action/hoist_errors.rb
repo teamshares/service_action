@@ -36,11 +36,11 @@ module Action
                 "#hoist_errors is expected to wrap an Action call, but it returned a #{result.class.name} instead"
         end
 
-        handle_hoisted_errors(result, prefix:) unless result.ok?
+        _handle_hoisted_errors(result, prefix:) unless result.ok?
       end
 
       # Separate method to allow overriding in subclasses
-      def handle_hoisted_errors(result, prefix: nil)
+      def _handle_hoisted_errors(result, prefix: nil)
         @context.exception = result.exception if result.exception.present?
         @context.error_prefix = prefix if prefix.present?
 
