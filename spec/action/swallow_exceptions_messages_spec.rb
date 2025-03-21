@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Action do
-  describe "#custom_error configuration (for #error when swallowing exceptions)" do
+  describe "#error configuration (for #error when swallowing exceptions)" do
     let(:klass) { nil }
 
     let(:action) do
@@ -32,7 +32,7 @@ RSpec.describe Action do
     it { is_expected.to be_success }
     it { expect(subject.success).to eq("great news") }
     it { expect(subject.message).to eq("great news") }
-    it { expect(action.default_error).to eq("baseline message") }
+    it { expect(action._default_error_msg).to eq("baseline message") }
 
     context "with RuntimeError" do
       let(:klass) { RuntimeError }

@@ -69,8 +69,8 @@ module Action
       return if ok?
 
       msg = @context.error_from_user.presence || determine_message(
-        custom: action.custom_error,
-        default: action.default_error,
+        primary: action._primary_error_msg,
+        default: action._default_error_msg,
         exception:
       ) || "Something went wrong"
 
@@ -81,8 +81,8 @@ module Action
       return unless ok?
 
       determine_message(
-        custom: action.custom_success,
-        default: action.default_success
+        primary: action._primary_success_msg,
+        default: action._default_success_msg,
       ) || "Action completed successfully"
     end
 
@@ -94,8 +94,8 @@ module Action
 
     def exposure_method_name = :exposes
 
-    def determine_message(custom:, default:, exception: nil)
-      stringified(custom, exception:).presence || stringified(default, exception:).presence
+    def determine_message(primary:, default:, exception: nil)
+      stringified(primary, exception:).presence || stringified(default, exception:).presence
     end
 
     # Allow for callable OR string messages

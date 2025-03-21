@@ -4,9 +4,9 @@ module Action
   module SwallowExceptions
     def self.included(base)
       base.class_eval do
-        class_attribute :custom_success, :custom_error, :fail_prefix
-        class_attribute :default_success, default: "Action completed successfully"
-        class_attribute :default_error, default: "Something went wrong"
+        class_attribute :_primary_success_msg, :_primary_error_msg, :fail_prefix
+        class_attribute :_default_success_msg, default: "Action completed successfully"
+        class_attribute :_default_error_msg, default: "Something went wrong"
 
         include InstanceMethods
         extend ClassMethods
@@ -63,10 +63,10 @@ module Action
 
     module ClassMethods
       def messages(success: nil, default_success: nil, error: nil, default_error: nil, fail_prefix: nil)
-        self.custom_success = success if success.present?
-        self.default_success = default_success if default_success.present?
-        self.custom_error = error if error.present?
-        self.default_error = default_error if default_error.present?
+        self._primary_success_msg = success if success.present?
+        self._default_success_msg = default_success if default_success.present?
+        self._primary_error_msg = error if error.present?
+        self._default_error_msg = default_error if default_error.present?
         self.fail_prefix = fail_prefix if fail_prefix.present?
 
         true
