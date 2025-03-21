@@ -6,7 +6,7 @@ Just spinning this up -- not yet released (i.e. doc updates in flight).
 
 See our [User Guide](https://teamshares.github.io/service_action/guide/) for details.
 
-### Inheritance Support [!!]
+## Inheritance Support [!!]
 
 Out of the box Service Action only supports a direct style (every action must `include Action`).
 
