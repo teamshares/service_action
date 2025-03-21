@@ -58,7 +58,7 @@ module Action
       private
 
       def _parse_field_configs(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false,
-                              **validations)
+                               **validations)
         # Allow local access to explicitly-expected fields -- even externally-expected needs to be available locally
         # (e.g. to allow success message callable to reference exposed fields)
         fields.each do |field|

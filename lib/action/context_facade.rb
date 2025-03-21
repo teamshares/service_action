@@ -71,7 +71,7 @@ module Action
       msg = @context.error_from_user.presence || determine_message(
         primary: action._primary_error_msg,
         default: action._default_error_msg,
-        exception:
+        exception:,
       ) || "Something went wrong"
 
       [@context.error_prefix, msg].compact.join(" ").squeeze(" ")

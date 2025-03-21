@@ -16,7 +16,7 @@ RSpec.describe Action do
             when RuntimeError then "RUN RUN RUN"
             when ArgumentError then "Bad args: #{e.message}"
             end
-          }
+          },
         )
 
         def call

@@ -79,7 +79,7 @@ RSpec.describe Action do
             expects :foo, default: "bar"
             messages(
               default_success: "much success",
-              success: -> { "Great news: #{@var} from #{foo} and #{some_undefined_var}" }
+              success: -> { "Great news: #{@var} from #{foo} and #{some_undefined_var}" },
             )
 
             def call

@@ -35,7 +35,7 @@ module Action
       def _log_before
         debug [
           "About to execute",
-          context_for_logging(:inbound).presence&.inspect
+          context_for_logging(:inbound).presence&.inspect,
         ].compact.join(" with: ")
       end
 
@@ -44,7 +44,7 @@ module Action
 
         debug [
           "Execution completed (with outcome: #{outcome}) in #{elapsed_mils} milliseconds",
-          context_for_logging(:outbound).presence&.inspect
+          context_for_logging(:outbound).presence&.inspect,
         ].compact.join(". Set: ")
       end
 
@@ -55,7 +55,7 @@ module Action
       rescue StandardError => e
         [
           e.is_a?(Action::Failure) ? "failure" : "exception",
-          e
+          e,
         ]
       end
     end
