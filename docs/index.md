@@ -5,7 +5,7 @@ layout: home
 hero:
   name: "Service Action"
   text: "A terse convention for business logic"
-  tagline: My great project tagline
+  tagline: "**ALPHA release -- everything subject to change**"
   actions:
     - theme: brand
       text: User Guide
@@ -15,11 +15,12 @@ hero:
     #   link: /api-examples
 
 features:
-  - title: Feature A
+  - title: Declarative interface
     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
+  - title: Exception swallowing
     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
+  - title: Default Observability
     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
 ---
+
 

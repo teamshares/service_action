@@ -115,7 +115,6 @@ class MessagesController < ApplicationController
     result = Actions::Slack::Post.call( # [!code focus]
       channel: "#engineering",
       message: params[:message],
-      user: current_user,
     )
 
     if result.ok?  # [!code focus:2]
@@ -143,58 +142,16 @@ By design, `result.error` is always safe to show to the user.
 :star_struck: The calling code usually only cares about `ok?` and `error` -- no complex error handling needed.
 :::
 
-### Overview
 
 We make a clear distinction between user-facing and internal errors.
 
-#### User-facing errors (`fail!`)
+### User-facing errors (`fail!`)
 
 For _known_ failure modes, you can call `fail!("Some user-facing explanation")` at any time to abort execution and set `result.error` to your custom message.
 
-#### Internal errors (uncaught `raise`)
+### Internal errors (uncaught `raise`)
 
 Any exceptions will be swallowed and the action failed (i.e. _not_ `ok?`). `result.error` will be set to a generic error message ("Something went wrong" by default, but highly configurable).
 <!-- TODO: link to messaging configs -->
 
 The swallowed exception will be available on `result.exception` for your introspection, but it'll also be passed to your `on_exception` handler so, [with a bit of configuration](/getting-started/), you can trust that any exceptions have been logged to your error tracking service automatically (one more thing the dev doesn't need to think about).
-
-### Details
-
-::: danger ALPHA
-* TODO:  document the on_exception configuration
-* TODO: document how to override the generic error + add per-error-type string mappings
-:::
-
-### Putting it together
-
-```ruby
-class Actions::Slack::Post
-  include Action
-
-  expects :channel, default: VALID_CHANNELS.first
-  expects :message, type: String
-  expects :user, type: User
-
-  exposes :thread_id, type: String
-
-  before do
-    # NOTE: this could be done at the top of `call`, but using a before hook leaves the main method more scannable
-    fail! "You are not authorized to post to '#{channel}'" unless authorized? # [!code focus]
-  end
-
-  def call
-    response = client.chat_postMessage(channel:, text: message)
-    the_thread_id = response["ts"]
-
-    expose :thread_id, the_thread_id
-  end
-
-  private
-
-  def client = Slack::Web::Client.new
-
-  def authorized?
-    # ... your user authorization logic
-  end
-end
-```
