@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module ServiceAction; end
-require_relative "service_action/version"
+module Axn; end
+require_relative "axn/version"
 
 require "interactor"
 

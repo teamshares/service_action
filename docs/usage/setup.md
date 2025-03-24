@@ -5,7 +5,7 @@ outline: deep
 
 ## Installation
 
-Adding `service_action` to your Gemfile is enough to start using `include Action`.
+Adding `axn` to your Gemfile is enough to start using `include Action`.
 <!-- todo bundler -->
 
 

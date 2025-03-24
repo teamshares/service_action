@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "service_action"
+require "axn"
 require "pry-byebug"
 
 RSpec.configure do |config|

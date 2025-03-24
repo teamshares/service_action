@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe ServiceAction do
+RSpec.describe Axn do
   it "has a version number" do
-    expect(ServiceAction::VERSION).not_to be nil
+    expect(Axn::VERSION).not_to be nil
   end
 end

@@ -4,7 +4,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "Service Action",
   description: "A terse convention for business logic",
-  base: "/service_action/",
+  base: "/axn/",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
@@ -49,7 +49,7 @@ export default defineConfig({
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/teamshares/service_action' }
+      { icon: 'github', link: 'https://github.com/teamshares/axn' }
     ]
   }
 })

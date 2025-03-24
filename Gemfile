@@ -2,7 +2,7 @@
 
 source "https://rubygems.org"
 
-# Specify your gem's dependencies in service_action.gemspec
+# Specify your gem's dependencies in axn.gemspec
 gemspec
 
 gem "pry-byebug", "3.10.1"

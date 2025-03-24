@@ -1,10 +1,10 @@
-# ServiceAction
+# Axn ("Action")
 
 Just spinning this up -- not yet released (i.e. doc updates in flight).
 
 ## Installation & Usage
 
-See our [User Guide](https://teamshares.github.io/service_action/guide/) for details.
+See our [User Guide](https://teamshares.github.io/axn/guide/) for details.
 
 ## Inheritance Support [!!]
 
