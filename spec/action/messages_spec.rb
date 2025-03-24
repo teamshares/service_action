@@ -100,6 +100,10 @@ RSpec.describe Action do
 
         it { expect(result).not_to be_ok }
         it { is_expected.to eq("Bad news!") }
+
+        it "supports class level default_error" do
+          expect(action.default_error).to eq("Bad news!")
+        end
       end
 
       context "when dynamic" do
@@ -115,8 +119,13 @@ RSpec.describe Action do
         end
 
         it { expect(result).not_to be_ok }
+
         it "is evaluated within internal context" do
           is_expected.to eq("Bad news: ")
+        end
+
+        it "supports class level default_error" do
+          expect(action.default_error).to eq("Bad news: ")
         end
       end
 
@@ -129,8 +138,13 @@ RSpec.describe Action do
         end
 
         it { expect(result).not_to be_ok }
+
         it "is evaluated within internal context" do
           is_expected.to eq("Bad news: Action::InboundValidationError")
+        end
+
+        it "supports class level default_error" do
+          expect(action.default_error).to eq("Bad news: Action::Failure")
         end
       end
 
@@ -143,8 +157,13 @@ RSpec.describe Action do
         end
 
         it { expect(result).not_to be_ok }
+
         it "falls back to default" do
           is_expected.to eq("Something went wrong")
+        end
+
+        it "supports class level default_error" do
+          expect(action.default_error).to eq("Something went wrong")
         end
       end
     end

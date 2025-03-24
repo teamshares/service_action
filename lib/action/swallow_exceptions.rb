@@ -74,6 +74,8 @@ module Action
 
         { matcher => message }.compact.merge(match_and_messages).each { |mam| self._error_rescues += [mam] }
       end
+
+      def default_error = new.internal_context.default_error
     end
 
     module InstanceMethods
