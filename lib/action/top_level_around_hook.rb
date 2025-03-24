@@ -40,7 +40,7 @@ module Action
       end
 
       def _log_after(outcome:, timing_start:)
-        elapsed_mils = (Time.now - timing_start) * 1000
+        elapsed_mils = ((Time.now - timing_start) * 1000).round(3)
 
         debug [
           "Execution completed (with outcome: #{outcome}) in #{elapsed_mils} milliseconds",

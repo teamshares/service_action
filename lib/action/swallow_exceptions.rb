@@ -38,6 +38,7 @@ module Action
 
         def trigger_on_exception(e)
           Action.config.on_exception(e,
+                                     action: self,
                                      context: respond_to?(:context_for_logging) ? context_for_logging : @context.to_h)
         rescue StandardError => e
           # No action needed -- downstream #on_exception implementation should ideally log any internal failures, but

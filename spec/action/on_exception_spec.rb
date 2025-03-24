@@ -26,6 +26,7 @@ RSpec.describe Action do
 
     it "is given a filtered context (sensitive values filtered + only declared inbound/outbound fields)" do
       expect(described_class.config).to receive(:on_exception).with(anything,
+                                                                    action: action,
                                                                     context: filtered_context).and_call_original
       is_expected.not_to be_success
     end

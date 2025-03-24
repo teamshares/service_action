@@ -10,7 +10,7 @@ module Action
     def on_exception(e, action:, context: {}) # rubocop:disable Lint/DuplicateMethods
       if @on_exception
         # TODO: only pass action: or context: if requested
-        @on_exception&.call(e, action:, context:)
+        @on_exception.call(e, action:, context:)
       else
         log("[#{action.class.name}] Exception swallowed: #{e.class.name} - #{e.message}")
       end
