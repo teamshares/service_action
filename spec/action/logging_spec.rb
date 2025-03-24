@@ -4,7 +4,7 @@ RSpec.describe Action do
   describe "Logging" do
     let(:action) do
       build_action do
-        expects :level, default: :info
+        gets :level, default: :info
         def call
           log("Hello, World!", level:)
         end

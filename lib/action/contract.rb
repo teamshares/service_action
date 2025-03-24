@@ -34,8 +34,8 @@ module Action
     FieldConfig = Data.define(:field, :validations, :default, :preprocess, :sensitive)
 
     module ClassMethods
-      def expects(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false,
-                  **validations)
+      def gets(*fields, allow_blank: false, default: nil, preprocess: nil, sensitive: false,
+               **validations)
         _parse_field_configs(*fields, allow_blank:, default:, preprocess:, sensitive:, **validations).tap do |configs|
           duplicated = internal_field_configs.map(&:field) & configs.map(&:field)
           raise Action::DuplicateFieldError, "Duplicate field(s) declared: #{duplicated.join(", ")}" if duplicated.any?
@@ -45,7 +45,7 @@ module Action
         end
       end
 
-      def exposes(*fields, allow_blank: false, default: nil, sensitive: false, **validations)
+      def sets(*fields, allow_blank: false, default: nil, sensitive: false, **validations)
         _parse_field_configs(*fields, allow_blank:, default:, preprocess: nil, sensitive:, **validations).tap do |configs|
           duplicated = external_field_configs.map(&:field) & configs.map(&:field)
           raise Action::DuplicateFieldError, "Duplicate field(s) declared: #{duplicated.join(", ")}" if duplicated.any?
@@ -84,16 +84,16 @@ module Action
       def internal_context = @internal_context ||= _build_context_facade(:inbound)
       def external_context = @external_context ||= _build_context_facade(:outbound)
 
-      # NOTE: ideally no direct access from client code, but we need to expose this for internal Interactor methods
+      # NOTE: ideally no direct access from client code, but we need to set this for internal Interactor methods
       # (and passing through control methods to underlying context) in order to avoid rewriting internal methods.
       def context = external_context
 
       # Accepts either two positional arguments (key, value) or a hash of key/value pairs
-      def expose(*args, **kwargs)
+      def set(*args, **kwargs)
         if args.any?
           if args.size != 2
             raise ArgumentError,
-                  "expose must be called with exactly two positional arguments (or a hash of key/value pairs)"
+                  "set must be called with exactly two positional arguments (or a hash of key/value pairs)"
           end
 
           kwargs.merge!(args.first => args.last)

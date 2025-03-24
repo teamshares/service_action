@@ -39,7 +39,7 @@ RSpec.describe Action do
       context "when dynamic" do
         let(:action) do
           build_action do
-            expects :foo, default: "bar"
+            gets :foo, default: "bar"
             messages(success: -> { "Great news: #{@var} from #{foo}" })
 
             def call
@@ -57,11 +57,11 @@ RSpec.describe Action do
       context "when dynamic with exposed vars" do
         let(:action) do
           build_action do
-            exposes :foo, default: "bar"
+            sets :foo, default: "bar"
             messages(success: -> { "Great news: #{@var} from #{foo}" })
 
             def call
-              expose foo: "baz"
+              set foo: "baz"
               @var = 123
             end
           end
@@ -76,7 +76,7 @@ RSpec.describe Action do
       context "when dynamic raises error" do
         let(:action) do
           build_action do
-            expects :foo, default: "bar"
+            gets :foo, default: "bar"
             messages(
               default_success: "much success",
               success: -> { "Great news: #{@var} from #{foo} and #{some_undefined_var}" },
@@ -129,7 +129,7 @@ RSpec.describe Action do
       context "when static" do
         let(:action) do
           build_action do
-            expects :missing_param
+            gets :missing_param
             messages(error: "Bad news!")
           end
         end
@@ -141,7 +141,7 @@ RSpec.describe Action do
       context "when dynamic" do
         let(:action) do
           build_action do
-            expects :missing_param
+            gets :missing_param
             messages(error: -> { "Bad news: #{@var}" })
 
             def call
@@ -159,7 +159,7 @@ RSpec.describe Action do
       context "when dynamic wants exception" do
         let(:action) do
           build_action do
-            expects :missing_param
+            gets :missing_param
             messages(error: ->(e) { "Bad news: #{e.class.name}" })
           end
         end
@@ -173,7 +173,7 @@ RSpec.describe Action do
       context "when dynamic returns blank" do
         let(:action) do
           build_action do
-            expects :missing_param
+            gets :missing_param
             messages(default_error: "ZZ")
             messages(error: -> { "" })
           end
@@ -188,7 +188,7 @@ RSpec.describe Action do
       context "when dynamic returns blank" do
         let(:action) do
           build_action do
-            expects :missing_param
+            gets :missing_param
             messages(default_error: -> { "Zay" })
             messages(error: -> { "" })
           end

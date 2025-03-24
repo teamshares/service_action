@@ -11,7 +11,7 @@ RSpec.describe "One-off confirmation" do
         def self.included(base)
           base.class_eval do
             include Action
-            expects :wrapper_thing
+            gets :wrapper_thing
             before do
               log "before from wrapper"
             end
@@ -22,15 +22,15 @@ RSpec.describe "One-off confirmation" do
 
     let(:action) do
       build_action do
-        expects :name, type: String
-        exposes :greeting, type: String
+        gets :name, type: String
+        sets :greeting, type: String
 
         before do
           log "before from action"
         end
 
         def call
-          expose greeting: "hi, #{name.upcase}"
+          set greeting: "hi, #{name.upcase}"
         end
       end
     end
@@ -49,15 +49,15 @@ RSpec.describe "One-off confirmation" do
 
       let(:action) do
         build_wrapper_action do
-          expects :name, type: String
-          exposes :greeting, type: String
+          gets :name, type: String
+          sets :greeting, type: String
 
           before do
             log "before from action"
           end
 
           def call
-            expose greeting: "hi, #{name.upcase}"
+            set greeting: "hi, #{name.upcase}"
           end
         end
       end

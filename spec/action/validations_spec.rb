@@ -4,7 +4,7 @@ RSpec.describe Action do
   describe "inbound validation" do
     let(:action) do
       build_action do
-        expects :foo, type: Numeric, numericality: { greater_than: 10 }
+        gets :foo, type: Numeric, numericality: { greater_than: 10 }
       end
     end
 
@@ -30,11 +30,11 @@ RSpec.describe Action do
   describe "outbound validation" do
     let(:action) do
       build_action do
-        exposes :bar, type: Numeric, numericality: { greater_than: 10 }
-        exposes :qux, type: Numeric
+        sets :bar, type: Numeric, numericality: { greater_than: 10 }
+        sets :qux, type: Numeric
 
         def call
-          expose :qux, 99
+          set :qux, 99
         end
       end
     end
@@ -44,11 +44,11 @@ RSpec.describe Action do
 
       it { is_expected.to be_success }
 
-      it "exposes existing context" do
+      it "sets existing context" do
         expect(subject.bar).to eq(11)
       end
 
-      it "exposes new values" do
+      it "sets new values" do
         expect(subject.qux).to eq(99)
       end
 
@@ -74,10 +74,10 @@ RSpec.describe Action do
 
       let(:action) do
         build_action do
-          exposes :bar, type: Numeric, numericality: { greater_than: 10 }
+          sets :bar, type: Numeric, numericality: { greater_than: 10 }
 
           def call
-            expose :qux, 99
+            set :qux, 99
           end
         end
       end
@@ -93,8 +93,8 @@ RSpec.describe Action do
   describe "complex validation" do
     let(:action) do
       build_action do
-        expects :foo, type: String
-        exposes :bar, type: String
+        gets :foo, type: String
+        sets :bar, type: String
       end
     end
 

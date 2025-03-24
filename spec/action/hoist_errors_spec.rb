@@ -8,7 +8,7 @@ RSpec.describe Action do
 
     let(:action) do
       build_action do
-        expects :subaction
+        gets :subaction
         def call
           hoist_errors(prefix: "FROM HOIST:") { subaction.call }
         end
@@ -57,7 +57,7 @@ RSpec.describe Action do
     context "when the hoist_errors not given a block" do
       let(:action) do
         build_action do
-          expects :subaction
+          gets :subaction
           def call
             hoist_errors(prefix: "FROM HOIST:")
           end

@@ -3,17 +3,17 @@
 RSpec.describe Action do
   let(:action) do
     build_action do
-      expects :foo, type: Numeric, numericality: { greater_than: 10 }
-      expects :ssn, sensitive: true
+      gets :foo, type: Numeric, numericality: { greater_than: 10 }
+      gets :ssn, sensitive: true
 
-      exposes :bar
-      exposes :phone, sensitive: true
-      exposes :the_internal_context, sensitive: true
+      sets :bar
+      sets :phone, sensitive: true
+      sets :the_internal_context, sensitive: true
 
       def call
-        expose :bar, foo * 10
-        expose :phone, "123-456-7890"
-        expose :the_internal_context, internal_context
+        set :bar, foo * 10
+        set :phone, "123-456-7890"
+        set :the_internal_context, internal_context
         fail! "intentional error" if foo == 13
       end
     end

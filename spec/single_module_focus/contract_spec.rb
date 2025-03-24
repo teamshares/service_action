@@ -5,8 +5,8 @@ require "action/contract"
 RSpec.describe Action::Contract do
   let(:interactor) do
     build_interactor(described_class) do
-      expects :foo, type: Numeric, numericality: { greater_than: 10 }
-      exposes :bar
+      gets :foo, type: Numeric, numericality: { greater_than: 10 }
+      sets :bar
 
       def call
         foo * 10
@@ -50,11 +50,11 @@ RSpec.describe Action::Contract do
 
     let(:interactor) do
       build_interactor(described_class) do
-        expects :foo, type: Numeric, numericality: { greater_than: 10 }
-        exposes :the_internal_context
+        gets :foo, type: Numeric, numericality: { greater_than: 10 }
+        sets :the_internal_context
 
         def call
-          expose :the_internal_context, internal_context
+          set :the_internal_context, internal_context
         end
       end
     end
@@ -91,8 +91,8 @@ RSpec.describe Action::Contract do
 
     let(:interactor) do
       build_interactor(described_class) do
-        expects :foo, type: Numeric, numericality: { greater_than: 10 }, allow_blank: true
-        exposes :bar, allow_blank: true
+        gets :foo, type: Numeric, numericality: { greater_than: 10 }, allow_blank: true
+        sets :bar, allow_blank: true
       end
     end
 
@@ -104,8 +104,8 @@ RSpec.describe Action::Contract do
 
     let(:interactor) do
       build_interactor(described_class) do
-        expects :foo, type: Numeric, default: 99
-        exposes :foo
+        gets :foo, type: Numeric, default: 99
+        sets :foo
       end
     end
 
@@ -120,7 +120,7 @@ RSpec.describe Action::Contract do
 
     let(:interactor) do
       build_interactor(described_class) do
-        exposes :foo, default: 99
+        sets :foo, default: 99
       end
     end
 
@@ -130,21 +130,21 @@ RSpec.describe Action::Contract do
     end
   end
 
-  describe "#expose" do
+  describe "#set" do
     subject { interactor.call }
 
     let(:interactor) do
       build_interactor(described_class) do
-        exposes :qux
+        sets :qux
 
         def call
-          expose :qux, 11 # Just confirming can call twice
-          expose :qux, 99
+          set :qux, 11 # Just confirming can call twice
+          set :qux, 99
         end
       end
     end
 
-    it "can expose" do
+    it "can set" do
       is_expected.to be_success
       expect(subject.qux).to eq 99
     end
@@ -155,7 +155,7 @@ RSpec.describe Action::Contract do
 
     let(:interactor) do
       build_interactor(described_class) do
-        expects :foo, type: [String, Numeric]
+        gets :foo, type: [String, Numeric]
       end
     end
 
@@ -184,7 +184,7 @@ RSpec.describe Action::Contract do
 
     let(:interactor) do
       build_interactor(described_class) do
-        expects :foo, boolean: true
+        gets :foo, boolean: true
       end
     end
 
@@ -209,7 +209,7 @@ RSpec.describe Action::Contract do
 
     let(:interactor) do
       build_interactor(described_class) do
-        expects :foo, :bar, type: { with: Numeric, message: "should numberz" }
+        gets :foo, :bar, type: { with: Numeric, message: "should numberz" }
       end
     end
 
@@ -228,11 +228,11 @@ RSpec.describe Action::Contract do
 
     let(:interactor) do
       build_interactor(described_class) do
-        expects :foo, boolean: true
-        exposes :bar, allow_blank: true
+        gets :foo, boolean: true
+        sets :bar, allow_blank: true
 
         def call
-          expose :bar, 99 if foo
+          set :bar, 99 if foo
         end
       end
     end
@@ -253,11 +253,11 @@ RSpec.describe Action::Contract do
 
     let(:interactor) do
       build_interactor(described_class) do
-        expects :date_as_date, type: Date, preprocess: ->(raw) { Date.parse(raw) }
-        exposes :date_as_date
+        gets :date_as_date, type: Date, preprocess: ->(raw) { Date.parse(raw) }
+        sets :date_as_date
 
         def call
-          expose date_as_date:
+          set date_as_date:
         end
       end
     end
@@ -287,7 +287,7 @@ RSpec.describe Action::Contract do
 
     let(:interactor) do
       build_interactor(described_class) do
-        expects :foo, validate: ->(value) { "must be pretty big" unless value > 10 }
+        gets :foo, validate: ->(value) { "must be pretty big" unless value > 10 }
       end
     end
 
@@ -303,7 +303,7 @@ RSpec.describe Action::Contract do
     context "when validator raises" do
       let(:interactor) do
         build_interactor(described_class) do
-          expects :foo, validate: ->(_value) { raise "oops" }
+          gets :foo, validate: ->(_value) { raise "oops" }
         end
       end
 
@@ -315,13 +315,13 @@ RSpec.describe Action::Contract do
     end
   end
 
-  describe "#expects" do
-    context "with multiple fields per expects line" do
+  describe "#gets" do
+    context "with multiple fields per gets line" do
       subject { interactor.call(foo:, bar:) }
 
       let(:interactor) do
         build_interactor(described_class) do
-          expects :foo, :bar, type: Numeric
+          gets :foo, :bar, type: Numeric
         end
       end
 
@@ -341,8 +341,8 @@ RSpec.describe Action::Contract do
     context "with multiple expectations on the same field" do
       let(:interactor) do
         build_interactor(described_class) do
-          expects :foo, type: String
-          expects :foo, numericality: { greater_than: 10 }
+          gets :foo, type: String
+          gets :foo, numericality: { greater_than: 10 }
         end
       end
 
@@ -352,18 +352,18 @@ RSpec.describe Action::Contract do
     end
   end
 
-  describe "#exposes" do
-    context "with multiple fields per expects line" do
+  describe "#sets" do
+    context "with multiple fields per gets line" do
       subject { interactor.call(baz:) }
 
       let(:baz) { 100 }
       let(:interactor) do
         build_interactor(described_class) do
-          expects :baz
-          exposes :foo, :bar, type: Numeric
+          gets :baz
+          sets :foo, :bar, type: Numeric
 
           def call
-            expose foo: baz, bar: baz
+            set foo: baz, bar: baz
           end
         end
       end
@@ -381,8 +381,8 @@ RSpec.describe Action::Contract do
     context "with multiple expectations on the same field" do
       let(:interactor) do
         build_interactor(described_class) do
-          exposes :foo, type: String
-          exposes :foo, numericality: { greater_than: 10 }
+          sets :foo, type: String
+          sets :foo, numericality: { greater_than: 10 }
         end
       end
 
@@ -396,7 +396,7 @@ RSpec.describe Action::Contract do
 
       let(:interactor) do
         build_interactor(described_class) do
-          exposes :foo, default: "bar"
+          sets :foo, default: "bar"
 
           def call
             puts "Foo is: #{foo}"

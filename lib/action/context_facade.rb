@@ -53,7 +53,7 @@ module Action
   class InternalContext < ContextFacade
     private
 
-    def exposure_method_name = :expects
+    def exposure_method_name = :gets
   end
 
   # Outbound / External ContextFacade
@@ -92,7 +92,7 @@ module Action
 
     private
 
-    def exposure_method_name = :exposes
+    def exposure_method_name = :sets
 
     def determine_message(primary:, default:, exception: nil)
       stringified(primary, exception:).presence || stringified(default, exception:).presence

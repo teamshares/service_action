@@ -8,10 +8,10 @@ module CustomActionWithFoo
   def self.included(base)
     base.class_eval do
       include Action
-      expects :foo, type: Numeric, numericality: { greater_than: 10 }
-      exposes :bar, type: Numeric
+      gets :foo, type: Numeric, numericality: { greater_than: 10 }
+      sets :bar, type: Numeric
       def call
-        expose bar: foo * 10
+        set bar: foo * 10
       end
     end
   end
@@ -19,10 +19,10 @@ end
 
 class ComposedClass
   include CustomActionWithFoo
-  expects :baz, default: 123
+  gets :baz, default: 123
 
   def call
-    expose bar: baz
+    set bar: baz
   end
 end
 

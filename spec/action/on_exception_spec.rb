@@ -10,9 +10,9 @@ RSpec.describe Action do
 
     let(:action) do
       build_action do
-        expects :name
-        expects :ssn, sensitive: true
-        exposes :outbound
+        gets :name
+        gets :ssn, sensitive: true
+        sets :outbound
 
         def call
           raise "Some internal issue!"
@@ -37,7 +37,7 @@ RSpec.describe Action do
 
     let(:action) do
       build_action do
-        expects :should_fail, allow_blank: true, default: false
+        gets :should_fail, allow_blank: true, default: false
 
         def call
           try do

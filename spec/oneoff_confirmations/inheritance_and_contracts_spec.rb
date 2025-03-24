@@ -7,24 +7,24 @@
 RSpec.describe "One-off confirmation: inheritance and contracts" do
   let(:base) do
     build_action do
-      expects :foo, type: Numeric, numericality: { greater_than: 10 }
-      exposes :bar, type: Numeric
+      gets :foo, type: Numeric, numericality: { greater_than: 10 }
+      sets :bar, type: Numeric
 
       def call
-        expose bar: foo * 10
+        set bar: foo * 10
       end
     end
   end
 
   let(:version_a) do
     Class.new(base) do
-      expects :baz, default: 123
+      gets :baz, default: 123
     end
   end
 
   let(:version_b) do
     Class.new(base) do
-      expects :baz, default: 100
+      gets :baz, default: 100
     end
   end
 

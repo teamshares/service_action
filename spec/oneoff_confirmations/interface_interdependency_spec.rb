@@ -7,7 +7,7 @@ RSpec.describe "One-off confirmation" do
     describe "default accepts proc" do
       let(:action) do
         build_action do
-          expects :channel, default: -> { valid_channels.first }
+          gets :channel, default: -> { valid_channels.first }
 
           def call
             log "Got channel: #{channel}"
@@ -30,8 +30,8 @@ RSpec.describe "One-off confirmation" do
       # describe "validations can reference instance methods" do
       #   let(:action) do
       #     build_action do
-      #       expects :channel, inclusion: { in: :valid_channels_for_number }
-      #       expects :number
+      #       gets :channel, inclusion: { in: :valid_channels_for_number }
+      #       gets :number
 
       #       def call
       #         log "Got channel: #{channel}"
@@ -62,7 +62,7 @@ RSpec.describe "One-off confirmation" do
             # NOTE: only works if method already defined!
             def self.valid_channels_for_number = ["overridden_valid_channels"]
 
-            expects :channel, inclusion: { in: valid_channels_for_number }
+            gets :channel, inclusion: { in: valid_channels_for_number }
 
             def call
               log "Got channel: #{channel}"
