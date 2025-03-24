@@ -4,7 +4,7 @@ module Action
   module SwallowExceptions
     def self.included(base)
       base.class_eval do
-        class_attribute :_success_msg, :_error_msg, :_fail_prefix
+        class_attribute :_success_msg, :_error_msg
         class_attribute :_error_rescues, default: []
 
         include InstanceMethods
@@ -62,10 +62,9 @@ module Action
     end
 
     module ClassMethods
-      def messages(success: nil, error: nil, fail_prefix: nil)
+      def messages(success: nil, error: nil)
         self._success_msg = success if success.present?
         self._error_msg = error if error.present?
-        self._fail_prefix = fail_prefix if fail_prefix.present?
 
         true
       end
@@ -82,9 +81,7 @@ module Action
 
       def fail!(message = nil)
         @context.instance_variable_set("@failure", true)
-
         @context.error_from_user = message if message.present?
-        @context.error_prefix = _fail_prefix if _fail_prefix.present? && message.present?
 
         # TODO: should we use context_for_logging here? But doublecheck the one place where we're checking object_id on it...
         raise Action::Failure.new(@context) # rubocop:disable Style/RaiseArgs

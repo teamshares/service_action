@@ -20,13 +20,12 @@ RSpec.describe Action do
     context "when the subaction fails" do
       let(:subaction) do
         build_action do
-          messages fail_prefix: "SSS"
           def call = fail!("subaction failed")
         end
       end
 
       it { is_expected.not_to be_ok }
-      it { expect(subject.error).to eq("FROM HOIST: SSS subaction failed") }
+      it { expect(subject.error).to eq("FROM HOIST: subaction failed") }
       it { expect(subject.exception).to be_nil }
     end
 

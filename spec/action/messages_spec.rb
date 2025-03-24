@@ -4,24 +4,6 @@ RSpec.describe Action do
   describe "#messages configuration" do
     subject(:result) { action.call }
 
-    describe "fail_prefix" do
-      subject { result.error }
-
-      context "when static" do
-        let(:action) do
-          build_action do
-            messages(fail_prefix: "PREFIX")
-            def call
-              fail! "a message"
-            end
-          end
-        end
-
-        it { expect(result).not_to be_ok }
-        it { is_expected.to eq("PREFIX a message") }
-      end
-    end
-
     describe "success message" do
       subject { result.success }
 

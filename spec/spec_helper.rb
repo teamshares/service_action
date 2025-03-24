@@ -17,7 +17,7 @@ RSpec.configure do |config|
   config.before(:suite) do
     Action.configure do |c|
       # Hide default logging
-      c.logger = Logger.new("/dev/null")
+      c.logger = Logger.new(File::NULL)
     end
   end
 end
