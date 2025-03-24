@@ -4,9 +4,8 @@ module Action
   module SwallowExceptions
     def self.included(base)
       base.class_eval do
-        class_attribute :_primary_success_msg, :_primary_error_msg, :fail_prefix
-        class_attribute :_default_success_msg, default: "Action completed successfully"
-        class_attribute :_default_error_msg, default: "Something went wrong"
+        class_attribute :_success_msg, :_error_msg, :_fail_prefix
+        class_attribute :_error_rescues, default: []
 
         include InstanceMethods
         extend ClassMethods
@@ -63,14 +62,18 @@ module Action
     end
 
     module ClassMethods
-      def messages(success: nil, default_success: nil, error: nil, default_error: nil, fail_prefix: nil)
-        self._primary_success_msg = success if success.present?
-        self._default_success_msg = default_success if default_success.present?
-        self._primary_error_msg = error if error.present?
-        self._default_error_msg = default_error if default_error.present?
-        self.fail_prefix = fail_prefix if fail_prefix.present?
+      def messages(success: nil, error: nil, fail_prefix: nil)
+        self._success_msg = success if success.present?
+        self._error_msg = error if error.present?
+        self._fail_prefix = fail_prefix if fail_prefix.present?
 
         true
+      end
+
+      def rescues(matcher = nil, message = nil, **match_and_messages)
+        raise ArgumentError, "rescues must be called with a key, value pair or else keyword args" if [matcher, message].compact.size == 1
+
+        { matcher => message }.compact.merge(match_and_messages).each { |mam| self._error_rescues += [mam] }
       end
     end
 
@@ -81,7 +84,7 @@ module Action
         @context.instance_variable_set("@failure", true)
 
         @context.error_from_user = message if message.present?
-        @context.error_prefix = fail_prefix if fail_prefix.present? && message.present?
+        @context.error_prefix = _fail_prefix if _fail_prefix.present? && message.present?
 
         # TODO: should we use context_for_logging here? But doublecheck the one place where we're checking object_id on it...
         raise Action::Failure.new(@context) # rubocop:disable Style/RaiseArgs
@@ -95,6 +98,8 @@ module Action
       rescue StandardError => e
         trigger_on_exception(e)
       end
+
+      delegate :default_error, to: :internal_context
     end
   end
 end

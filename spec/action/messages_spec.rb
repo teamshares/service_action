@@ -77,10 +77,7 @@ RSpec.describe Action do
         let(:action) do
           build_action do
             gets :foo, default: "bar"
-            messages(
-              default_success: "much success",
-              success: -> { "Great news: #{@var} from #{foo} and #{some_undefined_var}" },
-            )
+            messages(success: -> { "Great news: #{@var} from #{foo} and #{some_undefined_var}" })
 
             def call
               @var = 123
@@ -90,35 +87,20 @@ RSpec.describe Action do
 
         it { expect(result).to be_ok }
         it "falls back to default success" do
-          is_expected.to eq("much success")
+          is_expected.to eq("Action completed successfully")
         end
       end
 
-      context "when dynamic returns nil" do
+      context "when dynamic returns blank" do
         let(:action) do
           build_action do
-            messages(default_success: "OK")
             messages(success: -> { "" })
           end
         end
 
         it { expect(result).to be_ok }
         it "falls back to default" do
-          is_expected.to eq("OK")
-        end
-      end
-
-      context "when dynamic returns nil" do
-        let(:action) do
-          build_action do
-            messages(default_success: -> { "Kay" })
-            messages(success: -> { "" })
-          end
-        end
-
-        it { expect(result).to be_ok }
-        it "supports callable default" do
-          is_expected.to eq("Kay")
+          is_expected.to eq("Action completed successfully")
         end
       end
     end
@@ -174,29 +156,59 @@ RSpec.describe Action do
         let(:action) do
           build_action do
             gets :missing_param
-            messages(default_error: "ZZ")
             messages(error: -> { "" })
           end
         end
 
         it { expect(result).not_to be_ok }
         it "falls back to default" do
-          is_expected.to eq("ZZ")
+          is_expected.to eq("Something went wrong")
         end
       end
+    end
 
-      context "when dynamic returns blank" do
+    describe "with rescues" do
+      context "when static" do
         let(:action) do
           build_action do
-            gets :missing_param
-            messages(default_error: -> { "Zay" })
-            messages(error: -> { "" })
+            gets :param
+            messages(error: "Bad news!")
+            rescues ArgumentError, ->(e) { "Argument error: #{e.message}" }
+            rescues "Action::InboundValidationError" => "Inbound validation error!"
+            rescues -> { param == 2 }, -> { "whoa a #{param}" }
+            rescues -> { param == 3 }, -> { "whoa: #{@var}" }
+            rescues -> { param == 4 }, -> { "whoa: #{default_error}" }
+
+            def call
+              @var = 123
+              raise ArgumentError, "bad arg" if param == 1
+
+              raise "something else"
+            end
           end
         end
 
         it { expect(result).not_to be_ok }
-        it "supports callable default" do
-          is_expected.to eq("Zay")
+        it { expect(result.error).to eq("Inbound validation error!") }
+
+        it "rescues specific exceptions" do
+          expect(action.call(param: 1).error).to eq("Argument error: bad arg")
+        end
+
+        it "rescues by callable matcher" do
+          expect(action.call(param: 2).error).to eq("whoa a 2")
+        end
+
+        it "can reference instance vars" do
+          expect(action.call(param: 3).error).to eq("whoa: 123")
+        end
+
+        it "can reference configured error" do
+          expect(action.call(param: 4).error).to eq("whoa: Bad news!")
+        end
+
+        it "falls back correctly" do
+          expect(action.call(param: 5).error).to eq("Bad news!")
         end
       end
     end

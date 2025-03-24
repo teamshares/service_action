@@ -47,10 +47,65 @@ module Action
 
       super
     end
+
+    def determine_error_message(only_default: false)
+      return @context.error_from_user if @context.error_from_user.present?
+
+      unless only_default
+        msg = message_from_rescues
+        return msg if msg.present?
+      end
+
+      the_exception = @context.exception || (only_default ? Action::Failure.new(@context) : nil)
+      stringified(action._error_msg, exception: the_exception).presence || "Something went wrong"
+    end
+
+    def message_from_rescues
+      Array(action._error_rescues).each do |(matcher, value)|
+        matches = if matcher.respond_to?(:call)
+                    if matcher.arity == 1
+                      !!action.instance_exec(exception, &matcher)
+                    else
+                      !!action.instance_exec(&matcher)
+                    end
+                  elsif matcher.is_a?(String) || matcher.is_a?(Symbol)
+                    klass = Object.const_get(matcher.to_s)
+                    klass && exception.is_a?(klass)
+                  elsif matcher < Exception
+                    exception.is_a?(matcher)
+                  else
+                    action.warn("Ignoring matcher #{matcher.inspect} in rescues command")
+                  end
+
+        return stringified(value, exception:) if matches
+      end
+
+      nil
+    end
+
+    # Allow for callable OR string messages
+    def stringified(msg, exception: nil)
+      return msg.presence unless msg.respond_to?(:call)
+
+      # The error message callable can take the exception as an argument
+      if exception && msg.arity == 1
+        action.instance_exec(exception, &msg)
+      else
+        action.instance_exec(&msg)
+      end
+    rescue StandardError => e
+      action.warn("Ignoring #{e.class.name} raised while determining message callable: #{e.message}")
+      nil
+    end
   end
 
   # Inbound / Internal ContextFacade
   class InternalContext < ContextFacade
+    # So can be referenced from within e.g. rescues callables
+    def default_error
+      [@context.error_prefix, determine_error_message(only_default: true)].compact.join(" ").squeeze(" ")
+    end
+
     private
 
     def exposure_method_name = :gets
@@ -68,22 +123,13 @@ module Action
     def error
       return if ok?
 
-      msg = @context.error_from_user.presence || determine_message(
-        primary: action._primary_error_msg,
-        default: action._default_error_msg,
-        exception:,
-      ) || "Something went wrong"
-
-      [@context.error_prefix, msg].compact.join(" ").squeeze(" ")
+      [@context.error_prefix, determine_error_message].compact.join(" ").squeeze(" ")
     end
 
     def success
       return unless ok?
 
-      determine_message(
-        primary: action._primary_success_msg,
-        default: action._default_success_msg,
-      ) || "Action completed successfully"
+      stringified(action._success_msg).presence || "Action completed successfully"
     end
 
     def ok = success
@@ -93,25 +139,6 @@ module Action
     private
 
     def exposure_method_name = :sets
-
-    def determine_message(primary:, default:, exception: nil)
-      stringified(primary, exception:).presence || stringified(default, exception:).presence
-    end
-
-    # Allow for callable OR string messages
-    def stringified(msg, exception: nil)
-      return msg.presence unless msg.respond_to?(:call)
-
-      # The error message callable can take the exception as an argument
-      if exception && msg.arity == 1
-        action.instance_exec(exception, &msg)
-      else
-        action.instance_exec(&msg)
-      end
-    rescue StandardError => e
-      action.warn("Ignoring #{e.class.name} raised while determining message callable: #{e.message}")
-      nil
-    end
   end
 
   class Inspector

@@ -10,11 +10,11 @@ RSpec.describe Action do
 
         messages(
           success: "great news",
-          default_error: "baseline message",
           error: lambda { |e|
             case e
             when RuntimeError then "RUN RUN RUN"
             when ArgumentError then "Bad args: #{e.message}"
+            else "baseline message"
             end
           },
         )
@@ -32,7 +32,6 @@ RSpec.describe Action do
     it { is_expected.to be_success }
     it { expect(subject.success).to eq("great news") }
     it { expect(subject.message).to eq("great news") }
-    it { expect(action._default_error_msg).to eq("baseline message") }
 
     context "with RuntimeError" do
       let(:klass) { RuntimeError }
