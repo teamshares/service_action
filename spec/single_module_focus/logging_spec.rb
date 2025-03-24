@@ -13,7 +13,7 @@ RSpec.describe Action::Logging do
   subject { interactor.call }
 
   before do
-    allow(interactor).to receive(:logger).and_return(logger)
+    allow(Action.config).to receive(:logger).and_return(logger)
   end
 
   it "logs" do

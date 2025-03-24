@@ -18,7 +18,7 @@ module Action
         level = :info if level == :debug && _targeted_for_debug_logging?
         msg = [_log_prefix, message].compact_blank.join(" ")
 
-        logger.send(level, msg)
+        Action.config.logger.send(level, msg)
       end
 
       LEVELS.each do |level|
@@ -35,17 +35,6 @@ module Action
 
         target_class_names = (ENV["SA_DEBUG_TARGETS"] || "").split(",").map(&:strip)
         target_class_names.include?(name)
-      end
-
-      # Hook for implementing classes to override logger
-      def logger
-        @logger ||= begin
-          Rails.logger
-        rescue NameError
-          Logger.new($stdout).tap do |l|
-            l.level = Logger::INFO
-          end
-        end
       end
     end
   end
