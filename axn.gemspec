@@ -8,14 +8,16 @@ Gem::Specification.new do |spec|
   spec.authors = ["Kali Donovan"]
   spec.email = ["kali@teamshares.com"]
 
-  spec.summary = "Pattern for writing callable service objects"
-  spec.description = "Contract validation and error swallowing wrappers around Interactor"
-  spec.homepage = "https://github.com/teamshares/service-action"
+  spec.summary = "A terse convention for business logic"
+  spec.description = "Pattern for writing callable service objects with contract validation and error swallowing"
+  spec.homepage = "https://github.com/teamshares/axn"
   spec.license = "MIT"
+
+  # NOTE: uses endless methods from 3, literal value omission from 3.1
   spec.required_ruby_version = ">= 3.1.0"
 
-  spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
-  spec.metadata["rubygems_mfa_required"] = "true"
+  # spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
+  # spec.metadata["rubygems_mfa_required"] = "true"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
@@ -39,4 +41,5 @@ Gem::Specification.new do |spec|
 
   # NOTE: for inheritance support, need to specify a fork in consuming applications' Gemfile (see Gemfile here for syntax)
   spec.add_dependency "interactor", "3.1.2" # We're building on this scaffolding for organizing business logic
+  spec.metadata["rubygems_mfa_required"] = "true"
 end

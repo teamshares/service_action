@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "Service Action"
+  name: "Axn"
   text: "A terse convention for business logic"
   tagline: "**ALPHA release -- everything subject to change**"
   actions:

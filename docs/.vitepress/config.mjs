@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "Service Action",
+  title: "Axn",
   description: "A terse convention for business logic",
   base: "/axn/",
   themeConfig: {

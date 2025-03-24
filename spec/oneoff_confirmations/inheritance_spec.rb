@@ -30,7 +30,7 @@ class InheritedClass < ComposedClass
 end
 
 RSpec.describe "One-off confirmation: inheritance via explicit" do
-  shared_examples "a service action" do |bar_value|
+  shared_examples "an action" do |bar_value|
     context "when valid" do
       subject { action.call(foo: 11) }
 
@@ -48,18 +48,18 @@ RSpec.describe "One-off confirmation: inheritance via explicit" do
 
   context "when called directly" do
     let(:action) { Class.new.send(:include, CustomActionWithFoo) }
-    it_behaves_like "a service action", 110
+    it_behaves_like "an action", 110
   end
 
   context "when called on composed class" do
     let(:action) { ComposedClass }
 
-    it_behaves_like "a service action", 123
+    it_behaves_like "an action", 123
   end
 
   context "when called on inherited class" do
     let(:action) { InheritedClass }
 
-    it_behaves_like "a service action", 123
+    it_behaves_like "an action", 123
   end
 end

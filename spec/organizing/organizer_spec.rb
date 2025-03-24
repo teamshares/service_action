@@ -69,7 +69,7 @@ RSpec.describe "Organizing" do
     end
   end
 
-  describe "service action organizer" do
+  describe "organizer" do
     subject { ServiceActionOrganizer.call(date:) }
 
     context "with valid date" do

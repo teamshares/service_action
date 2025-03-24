@@ -6,9 +6,9 @@ Just spinning this up -- not yet released (i.e. doc updates in flight).
 
 See our [User Guide](https://teamshares.github.io/axn/guide/) for details.
 
-## Inheritance Support [!!]
+## [!!] Inheritance Support
 
-Out of the box Service Action only supports a direct style (every action must `include Action`).
+Out of the box Axn only supports a direct style (every action must `include Action`).
 
 If you want to support inheritance, you'll need to add this line to your `Gemfile` (we're layered over Interactor, and their released version doesn't yet support inheritance):
 
@@ -21,7 +21,7 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 
 ## Contributions
 
-Service Action is open source and contributions from the community are encouraged! No contribution is too small.
+Axn is open source and contributions from the community are encouraged! No contribution is too small.
 
 See our [contribution guidelines](CONTRIBUTING.md) for more information.
 

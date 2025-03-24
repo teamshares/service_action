@@ -1,6 +1,6 @@
-# Contributing to Service Action
+# Contributing to Axn
 
-Service Action is open source and contributions from the community are encouraged!
+Axn is open source and contributions from the community are encouraged!
 No contribution is too small.
 
 Please consider:
@@ -27,7 +27,7 @@ If you are experiencing unexpected behavior and, after having read [our document
 
 1. [Search](https://github.com/teamshares/axn/issues) existing issues.
 2. Collect enough information to reproduce the issue:
-  * Service Action version
+  * Axn version
   * Ruby version
   * Rails version (if applicable)
   * Specific setup conditions
