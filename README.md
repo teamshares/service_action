@@ -1,4 +1,4 @@
-# Axn ("Action")
+# Axn -- [AHK-sin] (a.k.a. "Action")
 
 Just spinning this up -- not yet released (i.e. doc updates in flight).
 
