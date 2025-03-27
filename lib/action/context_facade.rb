@@ -108,7 +108,7 @@ module Action
 
     private
 
-    def exposure_method_name = :gets
+    def exposure_method_name = :expects
   end
 
   # Outbound / External ContextFacade
@@ -138,7 +138,7 @@ module Action
 
     private
 
-    def exposure_method_name = :sets
+    def exposure_method_name = :exposes
   end
 
   class Inspector

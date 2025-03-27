@@ -42,7 +42,7 @@ module Action
         super()
       end
 
-      def message = "Attempted to set unknown key '#{@key}': be sure to declare it with `sets :#{@key}`"
+      def message = "Attempted to expose unknown key '#{@key}': be sure to declare it with `exposes :#{@key}`"
     end
   end
 

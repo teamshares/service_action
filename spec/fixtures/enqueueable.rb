@@ -6,7 +6,7 @@ class TestEnqueueableInteractor
   include Action
   queue_options retry: 10, retry_queue: "low"
 
-  gets :name, :address
+  expects :name, :address
 
   def call
     puts "Name: #{name}"
@@ -18,7 +18,7 @@ class AnotherEnqueueableInteractor
   include Action
   queue_options retry: 10, retry_queue: "low"
 
-  gets :foo
+  expects :foo
 
   def call
     puts "Another Interactor: #{foo}"
