@@ -6,7 +6,7 @@ RSpec.describe Action do
 
     let(:action) do
       build_action do
-        gets :klass, allow_blank: true
+        expects :klass, allow_blank: true
 
         messages(
           success: "great news",
